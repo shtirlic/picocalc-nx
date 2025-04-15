@@ -1,0 +1,19 @@
+IndentWidth: 2
+UseTab: Never
+ColumnLimit: 78
+AlignTrailingComments:
+  Kind: Always
+BreakBeforeBraces: GNU
+BraceWrapping:
+  AfterEnum: true
+  AfterStruct: true
+  AfterUnion: true
+  IndentBraces: false
+  AfterCaseLabel: true
+  AfterControlStatement: Always
+AllowShortIfStatementsOnASingleLine: true
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDefinitionName: false
+  AfterFunctionDeclarationName: false
