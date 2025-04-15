@@ -27,7 +27,23 @@ The PicoCalc is an device based Rapberry Pico family (Pico, Pico 2) portbale MCU
 
 This board support package provides support for some of these peripherals.
 
-## Usage
+
+## Usage and Testing firmware builds
+
+Current pre-release firmware files are in https://github.com/shtirlic/picocalc-nx/releases
+
+## USB-C Serial connection to PicoCalc
+
+After connecting the USB-C to your PC, fire up a serial terminal and you should see the NuttX `nsh` prompt.
+
+Use `help` for available apps and commands.
+
+```console
+minicom -con -D /dev/ttyUSB0 -b 115200
+```
+
+
+## Manual Build
 
 Once you have installed all NuttX dependencies and set up the NuttX build environment according to the [NuttX guide][nx-install], you can clone this repository inside your `nuttx-space` dir.
 
@@ -61,14 +77,6 @@ make -j
 
 You should now have a UF2 `nuttx.uf2` that you can upload to the PicoCalc!
 
-## Serial connection
-
-After connecting usb-c to PC fire up serial terminal and you should see NuttX `nsh`  prompt.
-Use `help` for available apps and commands.
-
-```console
-minicom -con -D /dev/ttyUSB0 -b 115200
-```
 
 [picocalc]: https://github.com/clockworkpi/PicoCalc
 [pico-sdk]: https://github.com/raspberrypi/pico-sdk
