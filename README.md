@@ -13,7 +13,7 @@ The PicoCalc is an device based Rapberry Pico family (Pico, Pico 2) portbale MCU
 - [x] SPI
 - [x] I2C
 - [x] Serial
-- [x] PWM 2 channels (A+B) for stereo speakers (PWM5) (https://github.com/apache/nuttx/pull/16210)
+- [x] PWM 2 channels (A+B) for stereo speakers (PWM5)
 - [x] Speakers output
 - [ ] ILI9488 SPI Display 320x320
 - [ ] External PSRAM
