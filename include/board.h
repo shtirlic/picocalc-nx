@@ -31,6 +31,7 @@
 #include "rp23xx_i2sdev.h"
 #include "rp23xx_spidev.h"
 #include "rp23xx_spisd.h"
+#include "picocalc_kbd.h"
 
 #ifndef __ASSEMBLY__
 #include <stdint.h>

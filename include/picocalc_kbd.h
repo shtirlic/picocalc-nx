@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/src/rp23xx_bringup.c
+ * boards/arm/rp23xx/picocalc/include/picocalc_kbd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,74 +18,56 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_RP23XX_PICOCALC_INCLUDE_PICOCALC_KBD_H
+#define __BOARDS_ARM_RP23XX_PICOCALC_INCLUDE_PICOCALC_KBD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <debug.h>
-#include <stddef.h>
-
-#include <nuttx/fs/fs.h>
-
-#include <arch/board/board.h>
-
-#include "rp23xx_pico.h"
-
-#ifdef CONFIG_ARCH_BOARD_COMMON
-#include "rp23xx_common_bringup.h"
-#endif /* CONFIG_ARCH_BOARD_COMMON */
-
-#ifdef CONFIG_USERLED
-#include <nuttx/leds/userled.h>
-#endif
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/irq.h>
+#include <stdbool.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name: rp23xx_bringup
+ * Public Data
  ****************************************************************************/
 
-int rp23xx_bringup(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-#ifdef CONFIG_ARCH_BOARD_COMMON
-
-  int ret = rp23xx_common_bringup();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-#endif /* CONFIG_ARCH_BOARD_COMMON */
-
-    /* --- Place any board specific bringup code here --- */
-
-#ifdef CONFIG_USERLED
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
+#else
+#define EXTERN extern
 #endif
 
-#ifdef CONFIG_INPUT_BUTTONS
-  /* Register the BUTTON driver */
+  /****************************************************************************
+   * Public Function Prototypes
+   ****************************************************************************/
 
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
-    }
-#endif
+  /****************************************************************************
+   * Name: board_picocalc_kbd_initialize
+   *
+   * Description:
+   *   Initialize picocalc kbd driver and register the /dev/kbd device.
+   *
+   ****************************************************************************/
 
 #ifdef CONFIG_INPUT_PICOCALC_KBD
-  board_picocalc_kbd_initialize();
+  int board_picocalc_kbd_initialize(void);
 #endif
 
-  return OK;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_RP23XX_PICOCALC_INCLUDE_PICOCALC_KBD_H */
