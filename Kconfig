@@ -3,21 +3,33 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config INPUT_PICOCALC_KBD
-  bool "PicoCalc Keyboard Input Driver"
-  default y
-  select INPUT_KEYBOARD
-	---help---
-		PicoCalc keyboard driver
+config ARCH_BOARD_PICOCALC
+	bool "Raspberry Pi Pico 2 based PicoCalc"
+	default y
+	depends on ARCH_CHIP_RP23XX
+	select ARCH_HAVE_LEDS
+	select ARM_HAVE_DSP
+	select ARCH_HAVE_MPU
+	# select ARCH_HAVE_FPU
+	# select ARM_FPU_ABI_SOFT
 
-config INPUT_PICOCALC_KBD_BUFFSIZE
-	int "sim keyboard buffer size"
-	default 64
-	depends on INPUT_PICOCALC_KBD
 	---help---
-		PicoCalc keyboard buffer size
+		This is a port to the PicoCacl on Raspberry Pi Pico 2 board.
 
 if ARCH_BOARD_PICOCALC
 
+	config INPUT_PICOCALC_KBD
+		bool "PicoCalc Keyboard Input Driver"
+		default y
+		select INPUT_KEYBOARD
+		---help---
+			PicoCalc keyboard driver
+
+	config INPUT_PICOCALC_KBD_BUFFSIZE
+		int "sim keyboard buffer size"
+		default 64
+		depends on INPUT_PICOCALC_KBD
+		---help---
+			PicoCalc keyboard buffer size
 
 endif
