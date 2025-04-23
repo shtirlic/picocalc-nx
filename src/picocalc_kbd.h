@@ -27,20 +27,19 @@
 
 #include <nuttx/config.h>
 
-#define KEY_EVENT_PRESS(code) (((code) & 0xff) == 1)
-#define KEY_EVENT_RELEASE(code) (((code) & 0xff) == 3)
+#define KEY_STATE_IDLE 0
+#define KEY_STATE_PRESSED 1
+#define KEY_STATE_HOLD 2
+#define KEY_STATE_RELEASED 3
+
+#define KEY_EVENT_PRESS(code) (((code) & 0xff) == KEY_STATE_PRESSED)
+#define KEY_EVENT_HOLD(code) (((code) & 0xff) == KEY_STATE_HOLD)
+#define KEY_EVENT_RELEASE(code) (((code) & 0xff) == KEY_STATE_RELEASED)
+
 #define KEY_EVENT_CODE(code) ((code) >> 8)
 
 #define KBD_CTRL_PRESSED 0x7e02
 #define KBD_CTRL_RELEASED 0x7e03
-
-enum key_state
-{
-  KEY_STATE_IDLE = 0,
-  KEY_STATE_PRESSED,
-  KEY_STATE_HOLD,
-  KEY_STATE_RELEASED,
-};
 
 #define KEY_JOY_UP 0x01
 #define KEY_JOY_DOWN 0x02
@@ -94,50 +93,50 @@ static uint32_t keyboard_translate_picocalc_code(uint16_t keycode)
 {
   switch (keycode)
     {
-    case KEY_BREAK:
-      return KEYCODE_BREAK;
-    case KEY_DEL:
-      return KEYCODE_FWDDEL;
-    case KEY_BACKSPACE:
-      return KEYCODE_BACKDEL;
-    case KEY_HOME:
-      return KEYCODE_HOME;
-    case KEY_END:
-      return KEYCODE_END;
-    case KEY_LEFT:
-      return KEYCODE_LEFT;
-    case KEY_RIGHT:
-      return KEYCODE_RIGHT;
-    case KEY_UP:
-      return KEYCODE_UP;
-    case KEY_DOWN:
-      return KEYCODE_DOWN;
-    case KEY_ENTER:
-      return KEYCODE_ENTER;
-    case KEY_CAPS_LOCK:
-      return KEYCODE_CAPSLOCK;
-    case KEY_F1:
-      return KEYCODE_F1;
-    case KEY_F2:
-      return KEYCODE_F2;
-    case KEY_F3:
-      return KEYCODE_F3;
-    case KEY_F4:
-      return KEYCODE_F4;
-    case KEY_F5:
-      return KEYCODE_F5;
-    case KEY_F6:
-      return KEYCODE_F6;
-    case KEY_F7:
-      return KEYCODE_F7;
-    case KEY_F8:
-      return KEYCODE_F8;
-    case KEY_F9:
-      return KEYCODE_F9;
-    case KEY_F10:
-      return KEYCODE_F10;
-    default:
-      return keycode;
+      case KEY_BREAK:
+        return KEYCODE_BREAK;
+      case KEY_DEL:
+        return KEYCODE_FWDDEL;
+      case KEY_BACKSPACE:
+        return KEYCODE_BACKDEL;
+      case KEY_HOME:
+        return KEYCODE_HOME;
+      case KEY_END:
+        return KEYCODE_END;
+      case KEY_LEFT:
+        return KEYCODE_LEFT;
+      case KEY_RIGHT:
+        return KEYCODE_RIGHT;
+      case KEY_UP:
+        return KEYCODE_UP;
+      case KEY_DOWN:
+        return KEYCODE_DOWN;
+      case KEY_ENTER:
+        return KEYCODE_ENTER;
+      case KEY_CAPS_LOCK:
+        return KEYCODE_CAPSLOCK;
+      case KEY_F1:
+        return KEYCODE_F1;
+      case KEY_F2:
+        return KEYCODE_F2;
+      case KEY_F3:
+        return KEYCODE_F3;
+      case KEY_F4:
+        return KEYCODE_F4;
+      case KEY_F5:
+        return KEYCODE_F5;
+      case KEY_F6:
+        return KEYCODE_F6;
+      case KEY_F7:
+        return KEYCODE_F7;
+      case KEY_F8:
+        return KEYCODE_F8;
+      case KEY_F9:
+        return KEYCODE_F9;
+      case KEY_F10:
+        return KEYCODE_F10;
+      default:
+        return keycode;
     }
 }
 
