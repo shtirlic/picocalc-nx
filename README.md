@@ -8,12 +8,12 @@ Only Raspberry Pi Pico 2/2 W is supported for now. Other configurations may be a
 
 The PicoCalc is an device based Rapberry Pico family (Pico, Pico 2) portbale MCU termninal with several peripherals:
 - [x] Rasbberry Pico 2
-- [x] NuttX ostest passed
+- [x] NuttX ostest passed (some issues https://github.com/apache/nuttx/issues/16133)
 - [x] SD card access (FAT, automount to `/mnt/sd0`)
 - [x] SPI
 - [x] I2C
 - [x] Serial
-- [x] PWM 2 channels (A+B) for stereo speakers (PWM5)
+- [x] PWM 2-channels (A+B) for stereo speakers (PWM5)
 - [x] Speakers output
 - [x] ILI9488 SPI Display 320x320
 - [x] LVGL example
@@ -22,7 +22,7 @@ The PicoCalc is an device based Rapberry Pico family (Pico, Pico 2) portbale MCU
 - [x] Custom I2C keyboard as '/dev/kbd'
 - [ ] Special keys handling
 - [ ] Power unit and battery
-- [ ] SMP multicore
+- [ ] SMP multicore (https://github.com/apache/nuttx/issues/16133)
 - [ ] RISC-V cores? (1 ARM core + 1 RISC-V core)
 - [ ] Rasbberry Pico
 - [ ] Rasbberry Pico W wireless support
