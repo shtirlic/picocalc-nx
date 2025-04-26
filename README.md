@@ -15,7 +15,9 @@ The PicoCalc is an device based Rapberry Pico family (Pico, Pico 2) portbale MCU
 - [x] Serial
 - [x] PWM 2 channels (A+B) for stereo speakers (PWM5)
 - [x] Speakers output
-- [ ] ILI9488 SPI Display 320x320
+- [x] ILI9488 SPI Display 320x320
+- [x] LVGL example
+- [x] Optional framebuffer device
 - [ ] External PSRAM
 - [x] Custom I2C keyboard as '/dev/kbd'
 - [ ] Special keys handling

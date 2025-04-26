@@ -41,6 +41,15 @@
 #include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_LCD
+#include <nuttx/board.h>
+#endif
+
+#ifdef CONFIG_LCD_DEV
+#include <nuttx/lcd/lcd_dev.h>
+#endif
+
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -85,6 +94,20 @@ int rp23xx_bringup(void)
 
 #ifdef CONFIG_INPUT_PICOCALC_KBD
   board_picocalc_kbd_initialize();
+#endif
+
+#ifdef CONFIG_LCD_DEV
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_lcd_initialize() failed: %d\n", ret);
+    }
+
+  ret = lcddev_register(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
+    }
 #endif
 
   return OK;

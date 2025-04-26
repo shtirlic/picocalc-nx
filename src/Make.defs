@@ -46,6 +46,10 @@ ifeq ($(CONFIG_INPUT_PICOCALC_KBD),y)
   CSRCS += picocalc_kbd.c
 endif
 
+ifeq ($(CONFIG_PICOCALC_LCD),y)
+  CSRCS += picocalc_lcd.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

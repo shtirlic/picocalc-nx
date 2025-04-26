@@ -29,6 +29,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "rp23xx_pico.h"
 #include "rp23xx_gpio.h"
 
 #ifdef CONFIG_RP23XX_PSRAM
@@ -89,6 +90,14 @@ void rp23xx_boardinitialize(void)
   #ifdef CONFIG_RP23XX_PSRAM
   rp23xx_psramconfig();
   #endif
-
-  /* --- Place any board specific initialization here --- */
 }
+  /* --- Place any board specific initialization here --- */
+
+  #ifdef CONFIG_BOARD_LATE_INITIALIZE
+  void board_late_initialize(void)
+  {
+    /* Perform board-specific initialization */
+
+    rp23xx_bringup();
+  }
+  #endif

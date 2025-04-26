@@ -32,6 +32,8 @@
 #include "rp23xx_spidev.h"
 #include "rp23xx_spisd.h"
 #include "picocalc_kbd.h"
+#include "picocalc_lcd.h"
+
 
 #ifndef __ASSEMBLY__
 #include <stdint.h>
@@ -120,6 +122,16 @@
 #define BUTTON_USER2 1
 #define BUTTON_USER1_BIT (1 << BUTTON_USER1)
 #define BUTTON_USER2_BIT (1 << BUTTON_USER2)
+
+/****************************************************************************
+ * PicoCalc definitions
+ ****************************************************************************/
+
+#define DISPLAY_RST 15
+#define DISPLAY_DC 14
+#define DISPLAY_BCKL -1
+#define DISPLAY_SPI 1
+#define DISPLAY_SPI_FREQ (60 * MHZ)
 
 /****************************************************************************
  * Public Types

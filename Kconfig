@@ -18,15 +18,33 @@ config ARCH_BOARD_PICOCALC
 
 if ARCH_BOARD_PICOCALC
 
+	config PICOCALC_LCD
+		bool "PicoCalc LCD Driver"
+		default y
+		select LCD
+		select LCD_DEV
+		select LCD_PORTRAIT
+		select LCD_ILI9341
+		select LCD_ILI9341_IFACE0
+		select GRAPHICS_LVGL
+	  select LV_USE_DEMO_WIDGETS
+    select LV_USE_LOG
+    select LV_USE_NUTTX
+    select LV_USE_NUTTX_LCD
+		select EXAMPLES_LVGLDEMO
+
+		---help---
+			PicoCalc LCD driver
+
 	config INPUT_PICOCALC_KBD
 		bool "PicoCalc Keyboard Input Driver"
 		default y
 		select INPUT_KEYBOARD
 		---help---
-			PicoCalc keyboard driver
+			PicoCalc Keyboard Input Driver
 
 	config INPUT_PICOCALC_KBD_BUFFSIZE
-		int "sim keyboard buffer size"
+		int "PicoCalc keyboard buffer size"
 		default 64
 		depends on INPUT_PICOCALC_KBD
 		---help---
