@@ -76,115 +76,6 @@
  static const struct picocalc_lcd_config_data g_lcd_config[] =
  {
   // {
-  //   0x01, 0,
-  // },
-  // {
-  //   0xcf,3,
-  //   {
-  //     0x00,0xc1,0x30
-  //   }
-  // },
-  // {
-  //   0xed,4,
-  //   {
-  //     0x64,0x03,0x12,0x81
-  //   }
-  // },
-  // {
-  //   0xe8, 3,
-  //   {
-  //     0x85,0x00,0x78
-  //   }
-  // },
-  // {
-  //   0xcb, 5,
-  //   {
-  //     0x39,0x2C,0x00,0x34,0x02
-  //   }
-  // },
-  // {
-  //   0xf7, 1,
-  //   {
-  //     0x20
-  //   }
-  // },
-  // {
-  //   0xea, 2,
-  //   {
-  //     0x0,0x0
-  //   }
-  // },
-  // {
-  //   0xc0, 1,
-  //   {
-  //     0x23
-  //   }
-  // },
-  // {
-  //   0xc1, 1,
-  //   {
-  //     0x10
-  //   }
-  // },
-  // {
-  //   0xc5, 2,
-  //   {
-  //     0x3e,0x28
-  //   }
-  // },
-  // {
-  //   0xc7, 1,
-  //   {
-  //     0x86
-  //   }
-  // },
-  // {
-  //   0x37, 1,
-  //   {
-  //     0x00
-  //   }
-  // },
-  // {
-  //   0x3a, 1,
-  //   {
-  //     0x55
-  //   }
-  // },
-  // {
-  //   0xb1, 2,
-  //   {
-  //     0x00,0x18
-  //   }
-  // },
-  // {
-  //   0xb6, 2,
-  //   {
-  //     0x02,0x02
-  //   }
-  // },
-  // {
-  //   0x26, 1,
-  //   {
-  //     0x01
-  //   }
-  // },
-  // {
-  //   0xe0, 15,
-  //   {
-  //     0x0F,0x31,0x2B,0x0C,0x0E,0x08,
-  //     0x4E,0xF1,0x37,0x07,0x10,0x03,
-  //     0x0E,0x09,0x00
-  //   }
-  // },
-  //  {
-  //   0xe1, 15,
-  //   {
-  //     0x00,0x0E,0x14,0x03,0x11,0x07,
-  //     0x31,0xC1,0x48,0x08,0x0F,0x0C,
-  //     0x31,0x36,0x0F
-  //   }
-  // }
-  // {
   //   ILI9488_CMD_MEMORY_ACCESS_CONTROL, 1, //0x36
   //   {
   //     0x48
@@ -259,17 +150,6 @@
   //   }
   // }
   //  {
-  //   ILI9488_CMD_COLUMN_ADDRESS_SET, 4,
-  //   {
-  //     0,0,(ILI9341_XRES >> 8), (ILI9341_XRES & 0xff)
-  //   }
-  //  },
-  //  {
-  //  ILI9488_CMD_PAGE_ADDRESS_SET, 4,
-  //  {
-  //    0,0,(ILI9341_YRES >> 8), (ILI9341_YRES & 0xff)
-  //  }
-  //  },
    {
     ILI9488_CMD_INTERFACE_MODE_CONTROL, 1, //0xb0
     {
@@ -282,9 +162,6 @@
        0xa0
      }
    },
-  //  {
-  //    ILI9488_CMD_DISP_INVERSION_ON, 0, //0x21
-  //  },
 
     {
     ILI9488_CMD_DISPLAY_FUNCTION_CONTROL, 3, //0xb6
@@ -292,32 +169,15 @@
       0x02, 0x02, 0x3b
     }
    },
-  //  {
+   {
+    ILI9488_CMD_DISP_INVERSION_ON, 0, //0x21
+   },
+   //  {
   //    ILI9488_CMD_ADJUST_CONTROL_3, 4, //0xf7
   //    {
   //      0xa9, 0x51, 0x2c, 0x82
   //    }
   //  },
-
-  //  {
-  //    /* Sleep out */
-
-  //    ILI9341_SLEEP_OUT, 0
-  //  },
-  //  {
-  //    /* Display on */
-
-  //    ILI9341_DISPLAY_ON, 0
-  //  },
-  //  {
-  //   ILI9341_MEMORY_ACCESS_CONTROL, 0
-  //  },
-  //  {
-  //    ILI9341_MEMORY_ACCESS_CONTROL, 1,
-  //    {
-  //     ILI9341_MEMORY_ACCESS_CONTROL_MX | ILI9341_MEMORY_ACCESS_CONTROL_BGR
-  //    }
-  //  }
  };
 
 
@@ -693,7 +553,7 @@ return -ENODEV;
 
        rp23xx_gpio_init(DISPLAY_DC);
        rp23xx_gpio_setdir(DISPLAY_DC, true);
-      //  rp23xx_gpio_put(DISPLAY_DC, false);
+       rp23xx_gpio_put(DISPLAY_DC, true);
 
        rp23xx_gpio_init(DISPLAY_RST);
        rp23xx_gpio_setdir(DISPLAY_RST, true);
@@ -702,12 +562,12 @@ return -ENODEV;
 
        /* Reset ILI9341 */
 
-       pin_set_bit(DISPLAY_RST, LATSET);
-       up_mdelay(10);
-       pin_set_bit(DISPLAY_RST, LATCLR);
-       up_mdelay(10);
-       pin_set_bit(DISPLAY_RST, LATSET);
-       up_mdelay(200);
+      //  pin_set_bit(DISPLAY_RST, LATSET);
+      //  up_mdelay(10);
+      //  pin_set_bit(DISPLAY_RST, LATCLR);
+      //  up_mdelay(10);
+      //  pin_set_bit(DISPLAY_RST, LATSET);
+      // //  up_mdelay(10);
 
 
        /* Configure SPI */
@@ -732,9 +592,6 @@ return -ENODEV;
 
        if (g_lcd != NULL)
          {
-           /* Turn the LCD on at 100% power */
-
-
            for (int i = 0; i < nitems(g_lcd_config); i++)
              {
               picocalc_lcd_configure(&priv->dev,
@@ -743,9 +600,9 @@ return -ENODEV;
                 g_lcd_config[i].data);
               }
 
-            priv->dev.select(&priv->dev);
-            priv->dev.sendcmd(&priv->dev, ILI9488_CMD_DISP_INVERSION_ON);
-            up_mdelay(50);
+            // priv->dev.select(&priv->dev);
+            // priv->dev.sendcmd(&priv->dev, ILI9488_CMD_DISP_INVERSION_ON);
+            // up_mdelay(10);
             // priv->dev.sendcmd(&priv->dev, ILI9488_CMD_SLEEP_OUT);
             // up_mdelay(120);
             // priv->dev.sendcmd(&priv->dev, ILI9488_CMD_DISPLAY_ON);
@@ -753,10 +610,10 @@ return -ENODEV;
 
             // priv->dev.sendcmd(&priv->dev, ILI9488_CMD_MEMORY_ACCESS_CONTROL);
             // priv->dev.sendparam(&priv->dev, 0x40);
-            priv->dev.deselect(&priv->dev);
+            // priv->dev.deselect(&priv->dev);
 
             g_lcd->setpower(g_lcd, CONFIG_LCD_MAXPOWER);
-            up_mdelay(50);
+            // up_mdelay(50);
 
             ili9341_clear(g_lcd,RGBTO16(0x0,0xaa,0xff));
 
