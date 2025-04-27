@@ -93,26 +93,32 @@ static uint32_t keyboard_translate_picocalc_code(uint16_t keycode)
 {
   switch (keycode)
     {
+      case KEY_HOME:
+        return 2;
+      case KEY_END:
+        return 3;
+      case KEY_PAGE_UP:
+        return 11;
+      case KEY_PAGE_DOWN:
+        return 9;
+      case KEY_ESC:
+        return 27;
       case KEY_BREAK:
         return KEYCODE_BREAK;
       case KEY_DEL:
-        return KEYCODE_FWDDEL;
+        return 127;
       case KEY_BACKSPACE:
-        return KEYCODE_BACKDEL;
-      case KEY_HOME:
-        return KEYCODE_HOME;
-      case KEY_END:
-        return KEYCODE_END;
+        return 8;
       case KEY_LEFT:
-        return KEYCODE_LEFT;
+        return 20;
       case KEY_RIGHT:
-        return KEYCODE_RIGHT;
+        return 19;
       case KEY_UP:
-        return KEYCODE_UP;
+        return 17;
       case KEY_DOWN:
-        return KEYCODE_DOWN;
+        return 18;
       case KEY_ENTER:
-        return KEYCODE_ENTER;
+        return 10;
       case KEY_CAPS_LOCK:
         return KEYCODE_CAPSLOCK;
       case KEY_F1:

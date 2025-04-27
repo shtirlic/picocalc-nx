@@ -35,6 +35,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
+#include <pthread.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
@@ -56,7 +57,9 @@ struct picocalc_kbd_dev_s
 {
   struct keyboard_lowerhalf_s lower; /* Must be first */
   bool                        opened;
-  struct work_s               work;
+  pthread_t                   thread;  /* The polling thread */
+  bool                        thread_running;
+  int                         fd;
 };
 
 static struct picocalc_kbd_dev_s g_picocalc_kbd;
@@ -69,20 +72,14 @@ static int i2c_kbd_transfer(int fd, FAR struct i2c_msg_s *msgv, int msgc)
   return ioctl(fd, I2CIOC_TRANSFER, (unsigned long)((uintptr_t)&xfer));
 }
 
-static int i2c_kbd_read(uint16_t *outval)
+static int i2c_kbd_read(uint16_t *outval, void *arg)
 {
+  FAR struct picocalc_kbd_dev_s *priv = (FAR struct picocalc_kbd_dev_s *)arg;
+
   struct i2c_msg_s msgs[2];
   uint8_t          cmd = 0x09;
   uint8_t          buf[2];
-  int              ret, fd;
-
-  fd = open(I2C_KBD_DEV, O_RDONLY);
-  if (fd < 0)
-    {
-      _err("Failed to open I2C device %s\n", I2C_KBD_DEV);
-      return -1;
-    }
-  // _info("Opened I2C device: fd=%d\n", fd);
+  int              ret;
 
   // Write message: send command 0x09
   msgs[0].frequency = 100000;
@@ -99,19 +96,17 @@ static int i2c_kbd_read(uint16_t *outval)
   msgs[1].length    = 2;
 
   // Send write part (command)
-  ret = i2c_kbd_transfer(fd, &msgs[0], 1);
+  ret = i2c_kbd_transfer(priv->fd, &msgs[0], 1);
   if (ret < 0)
     {
       _err("i2c_kbd_read: Write transfer failed: %d (%d)\n", ret, errno);
-      close(fd);
       return ret;
     }
 
   usleep(16000); // Wait for device to prepare data
 
   // Read response
-  ret = i2c_kbd_transfer(fd, &msgs[1], 1);
-  close(fd);
+  ret = i2c_kbd_transfer(priv->fd, &msgs[1], 1);
   if (ret < 0)
     {
       _err("i2c_kbd_read: Read transfer failed: %d (%d)\n", ret, errno);
@@ -132,7 +127,7 @@ static int picocalc_kbd_read(void *arg)
   uint16_t   buff     = 0;
   int        c        = -1;
 
-  if (i2c_kbd_read(&buff) < 0)
+  if (i2c_kbd_read(&buff, priv) < 0)
     return -1;
 
   if (buff)
@@ -169,26 +164,29 @@ static int picocalc_kbd_read(void *arg)
   return 0;
 }
 
-static void picocalc_kbd_poll_func(FAR void *arg)
+static void *picocalc_kbd_poll_func(FAR void *arg)
 {
   FAR struct picocalc_kbd_dev_s *priv = (FAR struct picocalc_kbd_dev_s *)arg;
 
-  if (!priv->opened)
-    return;
+  while (priv->thread_running)
+  {
+    if (!priv->opened)
+      {
+        usleep(1000); // Sleep for a bit to avoid busy loop when closed
+        continue;
+      }
 
-  int ret = picocalc_kbd_read(priv);
-  if (ret < 0)
-    {
-      _err("Failed to picocalc_kbd_read: %d\n", ret);
-    }
+    int ret = picocalc_kbd_read(priv);
+    if (ret < 0)
+      {
+        _err("Failed to picocalc_kbd_read: %d\n", ret);
+      }
 
-  ret = work_queue(HPWORK, &priv->work, picocalc_kbd_poll_func, priv,
-                   MSEC2TICK(KBD_POLL_INTERVAL_MSEC));
+    usleep(MSEC2TICK(KBD_POLL_INTERVAL_MSEC));
+  }
 
-  if (ret < 0)
-    {
-      _err("Failed to queue work: %d\n", ret);
-    }
+  _info("Polling thread stopped\n");
+  return NULL;
 }
 
 static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
@@ -198,12 +196,27 @@ static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
   if (priv->opened)
     return 0;
 
-  priv->opened = true;
+  priv->fd = open(I2C_KBD_DEV, O_RDONLY);
+  if (priv->fd < 0)
+    {
+      _err("Failed to open I2C device %s\n", I2C_KBD_DEV);
+      return -1;
+    }
+  // _info("Opened I2C device: fd=%d\n", fd);
 
-  /* Start polling loop when device is opened */
-  work_queue(HPWORK, &priv->work, picocalc_kbd_poll_func, priv,
-             MSEC2TICK(KBD_POLL_INTERVAL_MSEC));
-  _info("picocalc_kbd polling started\n");
+  priv->opened = true;
+  priv->thread_running = true;
+
+  priv->thread_running = true;
+  int ret = pthread_create(&priv->thread, NULL, picocalc_kbd_poll_func, priv);
+  if (ret != 0)
+    {
+      _err("Failed to create polling thread: %d\n", ret);
+      close(priv->fd);
+      return -1;
+    }
+
+  _info("picocalc_kbd polling thread started\n");
 
   return 0;
 }
@@ -214,7 +227,11 @@ static int picocalc_kbd_close(FAR struct keyboard_lowerhalf_s *lower)
 
   priv->opened = false;
 
-  work_cancel(HPWORK, &priv->work);
+  priv->thread_running = false;
+  pthread_join(priv->thread, NULL);  // Wait for the thread to finish
+
+  close(priv->fd);
+  _info("picocalc_kbd closed\n");
 
   return 0;
 }
