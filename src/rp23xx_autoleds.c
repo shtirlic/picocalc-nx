@@ -45,9 +45,9 @@
  *   LED_IRQSENABLED   0  Interrupts enabled      OFF
  *   LED_STACKCREATED  1  Idle stack created      ON
  *   LED_INIRQ         2  In an interrupt         N/C
- *   LED_SIGNAL        2  In a signal handler     N/C
- *   LED_ASSERTION     2  An assertion failed     N/C
- *   LED_PANIC         3  The system has crashed  FLASH
+ *   LED_SIGNAL        3  In a signal handler     ON
+ *   LED_ASSERTION     4  An assertion failed     ON
+ *   LED_PANIC         5  The system has crashed  FLASH
  *   LED_IDLE             Not used
  *
  * Thus if the LED is statically on, NuttX has successfully  booted and is,
@@ -116,15 +116,21 @@ void board_autoled_on(int led)
 
   switch (led)
     {
-      case 0:  /* LED Off */
+      /* LED Off */
+      case 0:
+      case LED_IDLE:
         ledon = false;
         break;
 
-      case 2:  /* LED No change */
-        return;
+      /* LED NC*/
+      case LED_INIRQ:
+      return;
 
-      case 1:  /* LED On */
-      case 3:  /* LED On */
+      /* LED On */
+      case LED_STACKCREATED:
+      case LED_SIGNAL:
+      case LED_ASSERTION:
+      case LED_PANIC:
         break;
     }
 
@@ -148,18 +154,28 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
+  bool ledoff = false;
   switch (led)
     {
-      case 0:  /* LED Off */
-      case 1:  /* LED Off */
-      case 3:  /* LED Off */
-        break;
 
-      case 2:  /* LED No change */
-        return;
+      /* LED NC */
+      case 0:
+      case LED_INIRQ:
+      return;
+
+      case LED_IDLE:
+      ledoff = true;
+      break;
+
+      /* LED Off */
+      case LED_STACKCREATED:
+      case LED_SIGNAL:
+      case LED_ASSERTION:
+      case LED_PANIC:
+      break;
     }
 
-  rp23xx_gpio_put(GPIO_LED1, false); /* High illuminates */
+  rp23xx_gpio_put(GPIO_LED1, ledoff); /* High illuminates */
 }
 
 #endif /* CONFIG_ARCH_LEDS */

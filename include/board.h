@@ -104,10 +104,10 @@
 #define LED_IRQSENABLED 0  /* Interrupts enabled      OFF    */
 #define LED_STACKCREATED 1 /* Idle stack created      ON     */
 #define LED_INIRQ 2        /* In an interrupt         N/C    */
-#define LED_SIGNAL 2       /* In a signal handler     N/C    */
-#define LED_ASSERTION 2    /* An assertion failed     N/C    */
-#define LED_PANIC 3        /* The system has crashed  FLASH  */
-#undef LED_IDLE            /* Not used                       */
+#define LED_SIGNAL 3       /* In a signal handler     ON    */
+#define LED_ASSERTION 4    /* An assertion failed     ON    */
+#define LED_PANIC 5        /* The system has crashed  FLASH  */
+#define LED_IDLE  6           /* Not used                       */
 
 /* Thus if the LED is statically on, NuttX has successfully  booted and is,
  * apparently, running normally.  If the LED is flashing at approximately
