@@ -615,7 +615,9 @@ return -ENODEV;
             g_lcd->setpower(g_lcd, CONFIG_LCD_MAXPOWER);
             // up_mdelay(50);
 
+            ili9341_clear(g_lcd,RGBTO16(0xff,0xff,0xff));
             ili9341_clear(g_lcd,RGBTO16(0x0,0xaa,0xff));
+            ili9341_clear(g_lcd,RGBTO16(0x0,0x00,0x00));
 
           #if defined(CONFIG_VIDEO_FB) && defined(CONFIG_LCD_FRAMEBUFFER)
 
