@@ -75,16 +75,16 @@
 
  static const struct picocalc_lcd_config_data g_lcd_config[] =
  {
-  // {
-  //   ILI9488_CMD_MEMORY_ACCESS_CONTROL, 1, //0x36
-  //   {
-  //     0x48
-  //   }
-  // },
+  {
+    ILI9488_CMD_MEMORY_ACCESS_CONTROL, 1, //0x36
+    {
+      0x48
+    }
+  },
   // {
   //   ILI9488_CMD_COLMOD_PIXEL_FORMAT_SET, 1, //0x3a
   //   {
-  //     0x55
+  //     0x66
   //   }
   // },
   {
@@ -410,35 +410,30 @@ lcd->deselect(lcd);
 static int picocalc_lcd_sendgram(struct ili9341_lcd_s *lcd,
     const uint16_t *wd, uint32_t nwords)
 {
-struct picocalc_lcd_s *priv = (struct picocalc_lcd_s *)lcd;
+  struct picocalc_lcd_s *priv = (struct picocalc_lcd_s *)lcd;
 
-lcdinfo("lcd:%p, wd=%p, nwords=%" PRIu32 "\n", lcd, wd, nwords);
+  lcdinfo("lcd:%p, wd=%p, nwords=%" PRIu32 "\n", lcd, wd, nwords);
 
-SPI_SETBITS(priv->spi, 16);
-SPI_SNDBLOCK(priv->spi, wd, nwords);
+  SPI_SETBITS(priv->spi, 16);
+  SPI_SNDBLOCK(priv->spi, wd, nwords);
 
-return OK;
+  return OK;
 }
-// lcdinfo("lcd:%p, wd=%p, nwords=%" PRIu32 "\n", lcd, wd, nwords);
+// // lcdinfo("lcd:%p, wd=%p, nwords=%" PRIu32 "\n", lcd, wd, nwords);
 
-// SPI_SETBITS(priv->spi, 8);  // Set SPI word length to 8 bits (1 byte)
+//   SPI_SETBITS(priv->spi, 8);
 
-// for (uint32_t i = 0; i < nwords; ++i)
-// {
-//   uint16_t color = wd[i];  // Get the current pixel color
-//   uint8_t q[3];  // Buffer to hold 3 bytes per pixel (RGB)
+//   uint8_t buf[nwords * 3];
 
-//   // Extract each component
-//   uint8_t r5 = (color >> 11) & 0x1F;
-//   uint8_t g6 = (color >> 5)  & 0x3F;
-//   uint8_t b5 = color & 0x1F;
-
-//   q[0] = (r5 << 3) | (r5 >> 2);  // Red
-//   q[1] = (g6 << 2) | (g6 >> 4);  // Green
-//   q[2] = (b5 << 3) | (b5 >> 2);  // Blue
-//   // Send the RGB888 components (3 bytes per pixel)
-//   SPI_SNDBLOCK(priv->spi, q, 3);  // Send the 3 bytes (RGB) at once
-//  return OK;
+//   for (uint32_t i = 0; i < nwords; ++i)
+//     {
+//       uint16_t color = wd[i];
+//       buf[i * 3 + 0] = ((color >> 11) & 0x1F) * 255 / 31;
+//       buf[i * 3 + 1] = ((color >> 5) & 0x3F) * 255 / 63;
+//       buf[i * 3 + 2] = (color & 0x1F) * 255 / 31;
+//     }
+//   SPI_SNDBLOCK(priv->spi, buf, nwords * 3);
+//   return OK;
 // }
 
 
