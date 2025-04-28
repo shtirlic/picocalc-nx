@@ -27,11 +27,9 @@ if ARCH_BOARD_PICOCALC
 		select LCD_ILI9341
 		select LCD_ILI9341_IFACE0
 		select GRAPHICS_LVGL
-	  select LV_USE_DEMO_WIDGETS
     select LV_USE_LOG
     select LV_USE_NUTTX
     select LV_USE_NUTTX_LCD
-		select EXAMPLES_LVGLDEMO
 
 		---help---
 			PicoCalc LCD driver
