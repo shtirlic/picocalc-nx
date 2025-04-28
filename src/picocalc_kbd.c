@@ -38,6 +38,7 @@
 #include <pthread.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/input/kbd_codec.h>
@@ -51,7 +52,7 @@
 #define I2C_KBD_DEV "/dev/i2c1"
 #define I2C_KBD_ADDR 0x1f
 #define KBD_DEVICE "/dev/kbd"
-#define KBD_POLL_INTERVAL_MSEC 10
+#define KBD_POLL_INTERVAL_MSEC 30
 
 struct picocalc_kbd_dev_s
 {
@@ -72,10 +73,8 @@ static int i2c_kbd_transfer(int fd, FAR struct i2c_msg_s *msgv, int msgc)
   return ioctl(fd, I2CIOC_TRANSFER, (unsigned long)((uintptr_t)&xfer));
 }
 
-static int i2c_kbd_read(uint16_t *outval, void *arg)
+static int i2c_kbd_read(uint16_t *outval)
 {
-  FAR struct picocalc_kbd_dev_s *priv = (FAR struct picocalc_kbd_dev_s *)arg;
-
   struct i2c_msg_s msgs[2];
   uint8_t          cmd = 0x09;
   uint8_t          buf[2];
@@ -96,17 +95,17 @@ static int i2c_kbd_read(uint16_t *outval, void *arg)
   msgs[1].length    = 2;
 
   // Send write part (command)
-  ret = i2c_kbd_transfer(priv->fd, &msgs[0], 1);
+  ret = i2c_kbd_transfer(g_picocalc_kbd.fd, &msgs[0], 1);
   if (ret < 0)
     {
       _err("i2c_kbd_read: Write transfer failed: %d (%d)\n", ret, errno);
       return ret;
     }
 
-  usleep(16000); // Wait for device to prepare data
+  nxsig_usleep(16000); // Wait for device to prepare data
 
   // Read response
-  ret = i2c_kbd_transfer(priv->fd, &msgs[1], 1);
+  ret = i2c_kbd_transfer(g_picocalc_kbd.fd, &msgs[1], 1);
   if (ret < 0)
     {
       _err("i2c_kbd_read: Read transfer failed: %d (%d)\n", ret, errno);
@@ -126,9 +125,11 @@ static int picocalc_kbd_read(void *arg)
   static int ctrlheld = 0;
   uint16_t   buff     = 0;
   int        c        = -1;
+  int        ret;
 
-  if (i2c_kbd_read(&buff, priv) < 0)
-    return -1;
+  ret = i2c_kbd_read(&buff);
+  if (ret < 0)
+    return ret;
 
   if (buff)
     {
@@ -167,22 +168,23 @@ static int picocalc_kbd_read(void *arg)
 static void *picocalc_kbd_poll_func(FAR void *arg)
 {
   FAR struct picocalc_kbd_dev_s *priv = (FAR struct picocalc_kbd_dev_s *)arg;
+  struct timespec interval;
+  interval.tv_sec = 0;
+  interval.tv_nsec = KBD_POLL_INTERVAL_MSEC * NSEC_PER_MSEC;
+  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+  pthread_setname_np(pthread_self(), "picocalc_kbd_poll");
 
   while (priv->thread_running)
   {
-    if (!priv->opened)
+    if (priv->opened)
       {
-        usleep(1000); // Sleep for a bit to avoid busy loop when closed
-        continue;
+        int ret = picocalc_kbd_read(priv);
+        if (ret < 0)
+          {
+            _err("Failed to picocalc_kbd_read: %d\n", ret);
+          }
       }
-
-    int ret = picocalc_kbd_read(priv);
-    if (ret < 0)
-      {
-        _err("Failed to picocalc_kbd_read: %d\n", ret);
-      }
-
-    usleep(MSEC2TICK(KBD_POLL_INTERVAL_MSEC));
+    nxsig_nanosleep(&interval, NULL);
   }
 
   _info("Polling thread stopped\n");
@@ -192,28 +194,38 @@ static void *picocalc_kbd_poll_func(FAR void *arg)
 static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
 {
   FAR struct picocalc_kbd_dev_s *priv = (FAR void *)lower;
+  pthread_attr_t attr;
+  struct sched_param param;
+  int                            ret;
 
   if (priv->opened)
     return 0;
 
-  priv->fd = open(I2C_KBD_DEV, O_RDONLY);
+  ret = priv->fd = open(I2C_KBD_DEV, O_RDONLY);
   if (priv->fd < 0)
     {
-      _err("Failed to open I2C device %s\n", I2C_KBD_DEV);
-      return -1;
+      _err("Failed to open I2C device %s: %d\n", I2C_KBD_DEV, errno);
+      return ret;
     }
   // _info("Opened I2C device: fd=%d\n", fd);
 
   priv->opened = true;
   priv->thread_running = true;
+  pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr, 2048);
+  param.sched_priority = 100;
+  pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+  pthread_attr_setschedparam(&attr, &param);
+  ret = pthread_create(&priv->thread, &attr, picocalc_kbd_poll_func, priv);
+  pthread_attr_destroy(&attr);
 
-  priv->thread_running = true;
-  int ret = pthread_create(&priv->thread, NULL, picocalc_kbd_poll_func, priv);
   if (ret != 0)
     {
       _err("Failed to create polling thread: %d\n", ret);
       close(priv->fd);
-      return -1;
+      priv->opened = false;
+      priv->thread_running = false;
+      return -ret;
     }
 
   _info("picocalc_kbd polling thread started\n");
