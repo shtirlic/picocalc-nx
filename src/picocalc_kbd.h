@@ -38,7 +38,7 @@
 
 #define KEY_EVENT_CODE(code) ((code) >> 8)
 
-#define KBD_CTRL_PRESSED 0x7e02
+#define KBD_CTRL_HOLD 0x7e02
 #define KBD_CTRL_RELEASED 0x7e03
 
 #define KEY_JOY_UP 0x01

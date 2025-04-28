@@ -138,7 +138,7 @@ static int picocalc_kbd_read(void *arg)
         {
           ctrlheld = 0;
         }
-      else if (buff == KBD_CTRL_PRESSED)
+      else if (buff == KBD_CTRL_HOLD)
         {
           ctrlheld = 1;
         }
