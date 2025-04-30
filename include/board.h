@@ -131,7 +131,7 @@
 #define DISPLAY_DC 14
 #define DISPLAY_BCKL -1
 #define DISPLAY_SPI 1
-#define DISPLAY_SPI_FREQ (60 * MHZ)
+#define DISPLAY_SPI_FREQ (75 * MHZ)
 
 /****************************************************************************
  * Public Types

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_ili9341.c
+ * boards/arm/rp23xx/picocalc/src/picocalc_lcd.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -47,11 +47,9 @@
  #include <nuttx/video/rgbcolors.h>
  #include <arch/board/board.h>
 
-
  #include "rp23xx_gpio.h"
  #include "rp23xx_spi.h"
 
- #include "picocalc_lcd.h"
 
  /****************************************************************************
   * Preprocessor Definitions
@@ -75,28 +73,16 @@
 
  static const struct picocalc_lcd_config_data g_lcd_config[] =
  {
-  {
-    ILI9488_CMD_MEMORY_ACCESS_CONTROL, 1, //0x36
-    {
-      0x48
-    }
-  },
+  // {
+  //   ILI9488_CMD_MEMORY_ACCESS_CONTROL, 1, //0x36
+  //   {
+  //     0x48
+  //   }
+  // },
   // {
   //   ILI9488_CMD_COLMOD_PIXEL_FORMAT_SET, 1, //0x3a
   //   {
   //     0x66
-  //   }
-  // },
-  {
-    ILI9488_CMD_DISPLAY_INVERSION_CONTROL, 1, //0xb4
-     {
-       0x0
-     }
-  },
-  // {
-  //   ILI9488_CMD_ENTRY_MODE_SET, 1, //0xb7
-  //   {
-  //     0xc6
   //   }
   // },
   // {
@@ -111,12 +97,7 @@
   //    0xa7
   //  }
   // },
-  // {
-  //   ILI9488_CMD_VCOM_CONTROL_1, 3, //0xc5
-  //   {
-  //     0x04
-  //   }
-  // },
+
   {
     ILI9488_CMD_POSITIVE_GAMMA_CORRECTION, 15, //0xe0
     {
@@ -143,6 +124,12 @@
       0x41
     }
    },
+   {
+    ILI9488_CMD_VCOM_CONTROL_1, 3, //0xc5
+    {
+      0x00,0x12,0x80
+    }
+   },
   // {
   //   ILI9488_CMD_TEARING_EFFECT_LINE_ON, 1, //0x35
   //   {
@@ -157,27 +144,38 @@
     }
    },
    {
-     ILI9488_CMD_FRAME_RATE_CONTROL_NORMAL, 1, //0xb1
+    ILI9488_CMD_DISP_INVERSION_ON, 0, //0x21
+   },
+   {
+    ILI9488_CMD_FRAME_RATE_CONTROL_NORMAL, 1, //0xb1
      {
        0xa0
      }
    },
-
-    {
+   {
+    ILI9488_CMD_DISPLAY_INVERSION_CONTROL, 1, //0xb4
+     {
+       0x2
+     }
+   },
+   {
     ILI9488_CMD_DISPLAY_FUNCTION_CONTROL, 3, //0xb6
     {
       0x02, 0x02, 0x3b
     }
    },
    {
-    ILI9488_CMD_DISP_INVERSION_ON, 0, //0x21
+    ILI9488_CMD_ENTRY_MODE_SET, 3, //0xb7
+    {
+      0xc6, 0xe9,0x00
+    }
    },
-   //  {
-  //    ILI9488_CMD_ADJUST_CONTROL_3, 4, //0xf7
-  //    {
-  //      0xa9, 0x51, 0x2c, 0x82
-  //    }
-  //  },
+    {
+     ILI9488_CMD_ADJUST_CONTROL_3, 4, //0xf7
+     {
+       0xa9, 0x51, 0x2c, 0x82
+     }
+   },
  };
 
 
@@ -208,6 +206,9 @@
  /****************************************************************************
   * Private Function Protototypes
   ****************************************************************************/
+
+ #define LCD_CMDDATA(d, id, cmd) (lcd_spi_cmddata(d, id, cmd))
+ static inline int lcd_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
  static void picocalc_lcd_select(struct ili9341_lcd_s *lcd);
  static void picocalc_lcd_deselect(struct ili9341_lcd_s *lcd);
@@ -240,17 +241,16 @@ static void picocalc_lcd_configure(struct ili9341_lcd_s *lcd,
     uint8_t data_bytes,
     const uint8_t *data)
 {
-lcd->select(lcd);
-lcd->sendcmd(lcd, cmd);
-if (data_bytes)
-{
-for (int i = 0; i < data_bytes; i++)
-{
-lcd->sendparam(lcd, data[i]);
-}
-}
-
-lcd->deselect(lcd);
+  lcd->select(lcd);
+  lcd->sendcmd(lcd, cmd);
+  if (data_bytes)
+    {
+      for (int i = 0; i < data_bytes; i++)
+        {
+          lcd->sendparam(lcd, data[i]);
+        }
+    }
+  lcd->deselect(lcd);
 }
 
  /****************************************************************************
@@ -495,7 +495,7 @@ static int picocalc_lcd_sendgram(struct ili9341_lcd_s *lcd,
    return OK;
  };
 
-int lcd_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+static inline int lcd_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
  {
    if (devid == SPIDEV_DISPLAY(0))
      {
@@ -531,7 +531,7 @@ return -ENODEV;
  {
    struct picocalc_lcd_s *priv = &g_lcddev;
    struct spi_dev_s *spi;
-   lcdinfo("Initializing LCD\n");
+   lcdinfo("Initializing PicoCalc LCD\n");
 
    if (g_lcd == NULL)
      {
@@ -555,7 +555,7 @@ return -ENODEV;
        rp23xx_gpio_put(DISPLAY_RST, true);
 
 
-       /* Reset ILI9341 */
+       /* Reset ILI9488 */
 
       //  pin_set_bit(DISPLAY_RST, LATSET);
       //  up_mdelay(10);
@@ -572,7 +572,7 @@ return -ENODEV;
        SPI_HWFEATURES(priv->spi, 0);
        SPI_SETFREQUENCY(priv->spi, DISPLAY_SPI_FREQ);
 
-       /* Initialize ILI9341 driver with necessary methods */
+       /* Initialize ILI9488 driver with necessary methods */
 
        priv->dev.select      = picocalc_lcd_select;
        priv->dev.deselect    = picocalc_lcd_deselect;
@@ -610,9 +610,9 @@ return -ENODEV;
             g_lcd->setpower(g_lcd, CONFIG_LCD_MAXPOWER);
             // up_mdelay(50);
 
-            ili9341_clear(g_lcd,RGBTO16(0xff,0xff,0xff));
-            ili9341_clear(g_lcd,RGBTO16(0x0,0xaa,0xff));
             ili9341_clear(g_lcd,RGBTO16(0x0,0x00,0x00));
+            // ili9341_clear(g_lcd,RGBTO16(0xff,0xff,0xff));
+            ili9341_clear(g_lcd,RGBTO16(0x0,0xaa,0xff));
 
           #if defined(CONFIG_VIDEO_FB) && defined(CONFIG_LCD_FRAMEBUFFER)
 
