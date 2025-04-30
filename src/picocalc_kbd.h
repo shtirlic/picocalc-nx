@@ -41,6 +41,8 @@
 #define KBD_CTRL_HOLD 0x7e02
 #define KBD_CTRL_RELEASED 0x7e03
 
+/* PicoCalc internal keyboard mapping  */
+
 #define KEY_JOY_UP 0x01
 #define KEY_JOY_DOWN 0x02
 #define KEY_JOY_LEFT 0x03
@@ -52,7 +54,9 @@
 #define KEY_BACKSPACE 0x08
 #define KEY_TAB 0x09
 #define KEY_ENTER 0x0A
-// 0x0D - CARRIAGE RETURN
+
+/* 0x0D - CARRIAGE RETURN */
+
 #define KEY_BTN_LEFT2 0x11
 #define KEY_BTN_RIGHT2 0x12
 
@@ -88,6 +92,15 @@
 #define KEY_F8 0x88
 #define KEY_F9 0x89
 #define KEY_F10 0x90
+
+struct picocalc_kbd_dev_s
+{
+  struct keyboard_lowerhalf_s lower;    /* Must be first */
+  bool                        opened;
+  int                         kthread;  /* The polling thread */
+  bool                        thread_running;
+  int                         fd;
+};
 
 static uint32_t keyboard_translate_picocalc_code(uint16_t keycode)
 {

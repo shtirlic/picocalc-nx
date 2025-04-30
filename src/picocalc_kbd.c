@@ -1,5 +1,5 @@
 /****************************************************************************
- *
+ * picocalc/src/picocalc_kbd.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,7 +25,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
 
 #include <assert.h>
 #include <debug.h>
@@ -34,10 +33,11 @@
 #include <poll.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <sys/types.h>
 #include <sys/ioctl.h>
+
 #include <nuttx/kthread.h>
 #include <nuttx/sched.h>
-
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
@@ -46,24 +46,8 @@
 #include <nuttx/input/keyboard.h>
 #include <nuttx/wqueue.h>
 
+#include <arch/board/board.h>
 #include "picocalc_kbd.h"
-
-/* Configurable */
-
-#define I2C_KBD_DEV "/dev/i2c1"
-#define I2C_KBD_ADDR 0x1f
-#define I2C_KBD_FREQ 10 * 1000 // 10Khz
-#define KBD_DEVICE "/dev/kbd"
-#define KBD_POLL_INTERVAL_MSEC 30
-
-struct picocalc_kbd_dev_s
-{
-  struct keyboard_lowerhalf_s lower;    /* Must be first */
-  bool                        opened;
-  int                         kthread;  /* The polling thread */
-  bool                        thread_running;
-  int                         fd;
-};
 
 static struct picocalc_kbd_dev_s g_picocalc_kbd;
 
@@ -78,25 +62,22 @@ static int i2c_kbd_transfer(int fd, FAR struct i2c_msg_s *msgv, int msgc)
 static int i2c_kbd_read(uint16_t *outval)
 {
   struct i2c_msg_s msgs[2];
-  uint8_t          cmd = 0x09;
+  uint8_t          cmd = PICOCALC_KBD_I2C_FIFO_CMD;
   uint8_t          buf[2];
   int              ret;
 
-  // Write message: send command 0x09
-  msgs[0].frequency = I2C_KBD_FREQ;
-  msgs[0].addr      = I2C_KBD_ADDR;
+  msgs[0].frequency = PICOCALC_KBD_I2C_FREQ;
+  msgs[0].addr      = PICOCALC_KBD_I2C_ADDR;
   msgs[0].flags     = I2C_M_NOSTOP;
   msgs[0].buffer    = &cmd;
   msgs[0].length    = 1;
 
-  // Read message: read 2 bytes into buf
-  msgs[1].frequency = I2C_KBD_FREQ;
-  msgs[1].addr      = I2C_KBD_ADDR;
+  msgs[1].frequency = PICOCALC_KBD_I2C_FREQ;
+  msgs[1].addr      = PICOCALC_KBD_I2C_ADDR;
   msgs[1].flags     = I2C_M_READ;
   msgs[1].buffer    = buf;
   msgs[1].length    = 2;
 
-  // Send write part (command)
   ret = i2c_kbd_transfer(g_picocalc_kbd.fd, &msgs[0], 1);
   if (ret < 0)
     {
@@ -104,9 +85,8 @@ static int i2c_kbd_read(uint16_t *outval)
       return ret;
     }
 
-  nxsig_usleep(16000); // Wait for device to prepare data
+  nxsig_usleep(16000);
 
-  // Read response
   ret = i2c_kbd_transfer(g_picocalc_kbd.fd, &msgs[1], 1);
   if (ret < 0)
     {
@@ -114,7 +94,6 @@ static int i2c_kbd_read(uint16_t *outval)
       return ret;
     }
 
-  // Assemble 16-bit result from two 8-bit values (little-endian)
   *outval = ((uint16_t)buf[1] << 8) | buf[0];
 
   return 0;
@@ -122,8 +101,6 @@ static int i2c_kbd_read(uint16_t *outval)
 
 static int picocalc_kbd_read(void)
 {
-  // FAR struct picocalc_kbd_dev_s *priv = (FAR struct picocalc_kbd_dev_s *)arg;
-
   static int ctrlheld = 0;
   uint16_t   buff     = 0;
   int        c        = -1;
@@ -135,7 +112,8 @@ static int picocalc_kbd_read(void)
 
   if (buff)
     {
-      // _info("Raw keycode: 0x%04x\n", buff);
+      /*  _info("Raw keycode: 0x%04x\n", buff); */
+
       if (buff == KBD_CTRL_RELEASED)
         {
           ctrlheld = 0;
@@ -154,12 +132,14 @@ static int picocalc_kbd_read(void)
 
           if (c > 0 && c <= 255)
             {
-              // _info("Char: %d %s\n", c,
-              // KEY_EVENT_PRESS(buff) ? "press" : "release");
+#if 0
+              _info("Char: %d %s\n", c,
+                    KEY_EVENT_PRESS(buff) ? "press" : "release");
+#endif
 
-              keyboard_event(&g_picocalc_kbd.lower, keyboard_translate_picocalc_code(c),
-                             KEY_EVENT_PRESS(buff) ? KEYBOARD_PRESS
-                                                   : KEYBOARD_RELEASE);
+              keyboard_event(&g_picocalc_kbd.lower,
+                keyboard_translate_picocalc_code(c),
+                  KEY_EVENT_PRESS(buff) ? KEYBOARD_PRESS : KEYBOARD_RELEASE);
             }
         }
     }
@@ -169,10 +149,9 @@ static int picocalc_kbd_read(void)
 
 static int picocalc_kbd_poll_worker(int argc, char *argv[])
 {
-  // FAR struct picocalc_kbd_dev_s *priv = g_picocalc_kbd->priv;
   struct timespec interval;
   interval.tv_sec = 0;
-  interval.tv_nsec = KBD_POLL_INTERVAL_MSEC * NSEC_PER_MSEC;
+  interval.tv_nsec = PICOCALC_KBD_POLL_INTERVAL_MSEC * NSEC_PER_MSEC;
 
   while (g_picocalc_kbd.thread_running)
   {
@@ -182,13 +161,13 @@ static int picocalc_kbd_poll_worker(int argc, char *argv[])
         if (ret < 0)
           {
             _err("Failed to picocalc_kbd_read: %d\n", ret);
-            // return ret;
           }
       }
     nxsig_nanosleep(&interval, NULL);
   }
 
-  _info("Polling thread stopped\n");
+  /*  _info("Polling thread stopped\n");  */
+
   return 0;
 }
 
@@ -200,18 +179,21 @@ static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
   if (priv->opened)
     return 0;
 
-  ret = priv->fd = open(I2C_KBD_DEV, O_RDONLY);
+  ret = priv->fd = open(PICOCALC_KBD_I2C_DEV, O_RDONLY);
   if (priv->fd < 0)
     {
-      _err("Failed to open I2C device %s: %d\n", I2C_KBD_DEV, errno);
+      _err("Failed to open I2C %s: %d\n", PICOCALC_KBD_I2C_DEV, errno);
       return ret;
     }
-  // _info("Opened I2C device: fd=%d\n", fd);
+
+  /*   _info("Opened I2C device: fd=%d\n", fd); */
 
   priv->opened = true;
   priv->thread_running = true;
-  ret = kthread_create("picocalc_kbd_poll", 50, 2048, picocalc_kbd_poll_worker,
-                       NULL);
+  ret = kthread_create("picocalc_kbd_poll",
+                     PICOCALC_KBD_POLL_PRIORITY,
+                           2048, picocalc_kbd_poll_worker,
+                        NULL);
 
   if (ret < 0)
     {
@@ -223,7 +205,7 @@ static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
     }
   priv->kthread = ret;
 
-  _info("picocalc_kbd polling thread started\n");
+  /*   _info("picocalc_kbd polling thread started\n"); */
 
   return 0;
 }
@@ -247,6 +229,7 @@ static ssize_t picocalc_kbd_write(FAR struct keyboard_lowerhalf_s *lower,
                                   FAR const char *buffer, size_t buflen)
 {
   /* Not typically used; return -ENOSYS unless needed for testing */
+
   return -ENOSYS;
 }
 
@@ -262,7 +245,7 @@ int board_picocalc_kbd_initialize(void)
   priv->lower.write = picocalc_kbd_write;
   priv->lower.priv  = priv;
 
-  ret = keyboard_register(&priv->lower, KBD_DEVICE,
+  ret = keyboard_register(&priv->lower, PICOCALC_KBD_DEVICE,
                           CONFIG_INPUT_PICOCALC_KBD_BUFFSIZE);
   if (ret < 0)
     {
