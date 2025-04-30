@@ -52,6 +52,7 @@
 
 #define I2C_KBD_DEV "/dev/i2c1"
 #define I2C_KBD_ADDR 0x1f
+#define I2C_KBD_FREQ 10 * 1000 // 10Khz
 #define KBD_DEVICE "/dev/kbd"
 #define KBD_POLL_INTERVAL_MSEC 30
 
@@ -82,14 +83,14 @@ static int i2c_kbd_read(uint16_t *outval)
   int              ret;
 
   // Write message: send command 0x09
-  msgs[0].frequency = 100000;
+  msgs[0].frequency = I2C_KBD_FREQ;
   msgs[0].addr      = I2C_KBD_ADDR;
   msgs[0].flags     = I2C_M_NOSTOP;
   msgs[0].buffer    = &cmd;
   msgs[0].length    = 1;
 
   // Read message: read 2 bytes into buf
-  msgs[1].frequency = 100000;
+  msgs[1].frequency = I2C_KBD_FREQ;
   msgs[1].addr      = I2C_KBD_ADDR;
   msgs[1].flags     = I2C_M_READ;
   msgs[1].buffer    = buf;
