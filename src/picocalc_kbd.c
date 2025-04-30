@@ -35,7 +35,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
-#include <pthread.h>
+#include <nuttx/kthread.h>
+#include <nuttx/sched.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/signal.h>
@@ -56,9 +57,9 @@
 
 struct picocalc_kbd_dev_s
 {
-  struct keyboard_lowerhalf_s lower; /* Must be first */
+  struct keyboard_lowerhalf_s lower;    /* Must be first */
   bool                        opened;
-  pthread_t                   thread;  /* The polling thread */
+  int                         kthread;  /* The polling thread */
   bool                        thread_running;
   int                         fd;
 };
@@ -118,9 +119,9 @@ static int i2c_kbd_read(uint16_t *outval)
   return 0;
 }
 
-static int picocalc_kbd_read(void *arg)
+static int picocalc_kbd_read(void)
 {
-  FAR struct picocalc_kbd_dev_s *priv = (FAR struct picocalc_kbd_dev_s *)arg;
+  // FAR struct picocalc_kbd_dev_s *priv = (FAR struct picocalc_kbd_dev_s *)arg;
 
   static int ctrlheld = 0;
   uint16_t   buff     = 0;
@@ -155,7 +156,7 @@ static int picocalc_kbd_read(void *arg)
               // _info("Char: %d %s\n", c,
               // KEY_EVENT_PRESS(buff) ? "press" : "release");
 
-              keyboard_event(&priv->lower, keyboard_translate_picocalc_code(c),
+              keyboard_event(&g_picocalc_kbd.lower, keyboard_translate_picocalc_code(c),
                              KEY_EVENT_PRESS(buff) ? KEYBOARD_PRESS
                                                    : KEYBOARD_RELEASE);
             }
@@ -165,37 +166,34 @@ static int picocalc_kbd_read(void *arg)
   return 0;
 }
 
-static void *picocalc_kbd_poll_func(FAR void *arg)
+static int picocalc_kbd_poll_worker(int argc, char *argv[])
 {
-  FAR struct picocalc_kbd_dev_s *priv = (FAR struct picocalc_kbd_dev_s *)arg;
+  // FAR struct picocalc_kbd_dev_s *priv = g_picocalc_kbd->priv;
   struct timespec interval;
   interval.tv_sec = 0;
   interval.tv_nsec = KBD_POLL_INTERVAL_MSEC * NSEC_PER_MSEC;
-  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-  pthread_setname_np(pthread_self(), "picocalc_kbd_poll");
 
-  while (priv->thread_running)
+  while (g_picocalc_kbd.thread_running)
   {
-    if (priv->opened)
+    if (g_picocalc_kbd.opened)
       {
-        int ret = picocalc_kbd_read(priv);
+        int ret = picocalc_kbd_read();
         if (ret < 0)
           {
             _err("Failed to picocalc_kbd_read: %d\n", ret);
+            // return ret;
           }
       }
     nxsig_nanosleep(&interval, NULL);
   }
 
   _info("Polling thread stopped\n");
-  return NULL;
+  return 0;
 }
 
 static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
 {
   FAR struct picocalc_kbd_dev_s *priv = (FAR void *)lower;
-  pthread_attr_t attr;
-  struct sched_param param;
   int                            ret;
 
   if (priv->opened)
@@ -211,22 +209,18 @@ static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
 
   priv->opened = true;
   priv->thread_running = true;
-  pthread_attr_init(&attr);
-  pthread_attr_setstacksize(&attr, 2048);
-  param.sched_priority = 100;
-  pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-  pthread_attr_setschedparam(&attr, &param);
-  ret = pthread_create(&priv->thread, &attr, picocalc_kbd_poll_func, priv);
-  pthread_attr_destroy(&attr);
+  ret = kthread_create("picocalc_kbd_poll", 50, 2048, picocalc_kbd_poll_worker,
+                       NULL);
 
-  if (ret != 0)
+  if (ret < 0)
     {
       _err("Failed to create polling thread: %d\n", ret);
       close(priv->fd);
       priv->opened = false;
       priv->thread_running = false;
-      return -ret;
+      return ret;
     }
+  priv->kthread = ret;
 
   _info("picocalc_kbd polling thread started\n");
 
@@ -240,7 +234,7 @@ static int picocalc_kbd_close(FAR struct keyboard_lowerhalf_s *lower)
   priv->opened = false;
 
   priv->thread_running = false;
-  pthread_join(priv->thread, NULL);  // Wait for the thread to finish
+  kthread_delete(priv->kthread);
 
   close(priv->fd);
   _info("picocalc_kbd closed\n");
