@@ -3,28 +3,53 @@ BasedOnStyle: GNU
 IndentWidth: 2
 TabWidth: 2
 UseTab: Never
-# BreakBeforeBraces: None
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterExternBlock: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterObjCDeclaration: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: true
+  IndentBraces: true
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
-ColumnLimit: 80
+ColumnLimit: 77
 SpacesBeforeTrailingComments: 1
 SpaceBeforeParens: ControlStatements
 IndentCaseLabels: true
 # AlignAfterOpenBracket: BlockIndent
 AlignConsecutiveDeclarations: true
 AlignConsecutiveAssignments: true
-AlignOperands: true
-ReflowComments: Never
+AlignOperands: Align
+# OperandAlignmentStyle: Align
+ReflowComments: false
 SortIncludes: false
 IncludeBlocks: Preserve
-KeepEmptyLinesAtTheStartOfBlocks: true
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: true
+  AtStartOfFile: false
 CommentPragmas: "^ *[*/]+"
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterDefinitionReturnType: All
+BreakAfterReturnType: Automatic
 BreakBeforeBinaryOperators: None
-# BreakBeforeTernaryOperators: false
-KeepMacroWhitespace: true
+# BreakBeforeTernaryOperators: true
+# KeepMacroWhitespace: true
 AlignEscapedNewlines: DontAlign
 # SpacesInConditionalStatement: true
 SpacesInParens: Never
 AllowShortLoopsOnASingleLine: true
+# IndentPPDirectives: AfterHash
+AlignArrayOfStructures: Left
