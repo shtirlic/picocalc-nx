@@ -42,6 +42,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/irq.h>
 #include <nuttx/input/kbd_codec.h>
 #include <nuttx/input/keyboard.h>
 #include <nuttx/wqueue.h>
@@ -65,34 +66,43 @@ static int i2c_kbd_read(uint16_t *outval)
   uint8_t          cmd = PICOCALC_KBD_I2C_FIFO_CMD;
   uint8_t          buf[2];
   int              ret;
+  // struct timespec  interval;
+  // irqstate_t flags;
+
+  // interval.tv_sec  = 0;
+  // interval.tv_nsec = 16 * NSEC_PER_MSEC;
 
   msgs[0].frequency = PICOCALC_KBD_I2C_FREQ;
   msgs[0].addr      = PICOCALC_KBD_I2C_ADDR;
   msgs[0].flags     = I2C_M_NOSTOP;
   msgs[0].buffer    = &cmd;
-  msgs[0].length    = 1;
+  msgs[0].length    = sizeof(cmd);
 
   msgs[1].frequency = PICOCALC_KBD_I2C_FREQ;
   msgs[1].addr      = PICOCALC_KBD_I2C_ADDR;
   msgs[1].flags     = I2C_M_READ;
   msgs[1].buffer    = buf;
-  msgs[1].length    = 2;
+  msgs[1].length    = sizeof(buf);
 
-  ret = i2c_kbd_transfer(g_picocalc_kbd.fd, &msgs[0], 1);
+  g_picocalc_kbd.i2c_status = 0;
+  // ret = i2c_kbd_transfer(g_picocalc_kbd.fd, &msgs[0], 1);
+  // if (ret < 0)
+  //   {
+  //     _err("i2c_kbd_read: Write transfer failed: %d (%d)\n", ret, errno);
+  //     return ret;
+  //   }
+  // nxsig_nanosleep(&interval, NULL);
+
+  // g_picocalc_kbd.i2c_status = 1;
+
+  ret = i2c_kbd_transfer(g_picocalc_kbd.fd, msgs, 2);
   if (ret < 0)
     {
-      _err("i2c_kbd_read: Write transfer failed: %d (%d)\n", ret, errno);
+      _err("i2c_kbd_read: Write/Read transfer failed: %d (%d)\n", ret, errno);
       return ret;
     }
 
-  nxsig_usleep(16000);
-
-  ret = i2c_kbd_transfer(g_picocalc_kbd.fd, &msgs[1], 1);
-  if (ret < 0)
-    {
-      _err("i2c_kbd_read: Read transfer failed: %d (%d)\n", ret, errno);
-      return ret;
-    }
+  g_picocalc_kbd.i2c_status = 1;
 
   *outval = ((uint16_t)buf[1] << 8) | buf[0];
 
@@ -139,7 +149,7 @@ static int picocalc_kbd_read(void)
 
               keyboard_event(&g_picocalc_kbd.lower,
                 keyboard_translate_picocalc_code(c),
-                  KEY_EVENT_PRESS(buff) ? KEYBOARD_PRESS : KEYBOARD_RELEASE);
+                KEY_EVENT_PRESS(buff) ? KEYBOARD_PRESS : KEYBOARD_RELEASE);
             }
         }
     }
@@ -150,21 +160,25 @@ static int picocalc_kbd_read(void)
 static int picocalc_kbd_poll_worker(int argc, char *argv[])
 {
   struct timespec interval;
-  interval.tv_sec = 0;
+  interval.tv_sec  = 0;
   interval.tv_nsec = PICOCALC_KBD_POLL_INTERVAL_MSEC * NSEC_PER_MSEC;
 
   while (g_picocalc_kbd.thread_running)
-  {
-    if (g_picocalc_kbd.opened)
-      {
-        int ret = picocalc_kbd_read();
-        if (ret < 0)
-          {
-            _err("Failed to picocalc_kbd_read: %d\n", ret);
-          }
-      }
-    nxsig_nanosleep(&interval, NULL);
-  }
+    {
+      if (g_picocalc_kbd.opened)
+        {
+          int ret = picocalc_kbd_read();
+          if (ret < 0)
+            {
+              _err("Failed to picocalc_kbd_read: %d\n", ret);
+            }
+        }
+      else
+        {
+          _err("g_picocalc_kbd.opened: %d\n", g_picocalc_kbd.opened);
+        }
+      nxsig_nanosleep(&interval, NULL);
+    }
 
   /*  _info("Polling thread stopped\n");  */
 
@@ -188,18 +202,16 @@ static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
 
   /*   _info("Opened I2C device: fd=%d\n", fd); */
 
-  priv->opened = true;
+  priv->opened         = true;
   priv->thread_running = true;
-  ret = kthread_create("picocalc_kbd_poll",
-                     PICOCALC_KBD_POLL_PRIORITY,
-                           2048, picocalc_kbd_poll_worker,
-                        NULL);
+  ret = kthread_create("picocalc_kbd_poll", PICOCALC_KBD_POLL_PRIORITY, 2048,
+                       picocalc_kbd_poll_worker, NULL);
 
   if (ret < 0)
     {
       _err("Failed to create polling thread: %d\n", ret);
       close(priv->fd);
-      priv->opened = false;
+      priv->opened         = false;
       priv->thread_running = false;
       return ret;
     }
