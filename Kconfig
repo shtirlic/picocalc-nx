@@ -9,9 +9,7 @@ config ARCH_BOARD_PICOCALC
 	depends on ARCH_CHIP_RP23XX
 	select ARCH_HAVE_LEDS
 	select ARM_HAVE_DSP
-	select ARCH_HAVE_MPU
-	# select ARCH_HAVE_FPU
-	# select ARM_FPU_ABI_SOFT
+	# select ARCH_HAVE_MPU
 
 	---help---
 		This is a port to the PicoCacl on Raspberry Pi Pico 2 board.
@@ -27,6 +25,7 @@ if ARCH_BOARD_PICOCALC
 		select LCD_ILI9341
 		select LCD_ILI9341_IFACE0
 		select GRAPHICS_LVGL
+		select CUSTOM_APPS_ATOMSHELL
     select LV_USE_LOG
     select LV_USE_NUTTX
     select LV_USE_NUTTX_LCD
