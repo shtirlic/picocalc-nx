@@ -93,6 +93,20 @@
 #define KEY_F9 0x89
 #define KEY_F10 0x90
 
+// Define an enum for LV key codes
+typedef enum {
+  LV_KEY_F1 = 0x0131,  // Hex value for F1
+  LV_KEY_F2 = 0x0132,  // Hex value for F2
+  LV_KEY_F3 = 0x0133,  // Hex value for F3
+  LV_KEY_F4 = 0x0134,  // Hex value for F4
+  LV_KEY_F5 = 0x0135,  // Hex value for F5
+  LV_KEY_F6 = 0x0136,  // Hex value for F6
+  LV_KEY_F7 = 0x0137,  // Hex value for F7
+  LV_KEY_F8 = 0x0138,  // Hex value for F8
+  LV_KEY_F9 = 0x0139,  // Hex value for F9
+  LV_KEY_F10 = 0x013A  // Hex value for F10
+} lv_key_t;
+
 struct picocalc_kbd_dev_s
 {
   struct keyboard_lowerhalf_s lower; /* Must be first */
@@ -136,25 +150,25 @@ static uint32_t keyboard_translate_picocalc_code(uint16_t keycode)
       case KEY_CAPS_LOCK:
         return KEYCODE_CAPSLOCK;
       case KEY_F1:
-        return KEYCODE_F1;
+        return LV_KEY_F1;
       case KEY_F2:
-        return KEYCODE_F2;
+        return LV_KEY_F2;
       case KEY_F3:
-        return KEYCODE_F3;
+        return LV_KEY_F3;
       case KEY_F4:
-        return KEYCODE_F4;
+        return LV_KEY_F4;
       case KEY_F5:
-        return KEYCODE_F5;
+        return LV_KEY_F5;
       case KEY_F6:
-        return KEYCODE_F6;
+        return LV_KEY_F6;
       case KEY_F7:
-        return KEYCODE_F7;
+        return LV_KEY_F7;
       case KEY_F8:
-        return KEYCODE_F8;
+        return LV_KEY_F8;
       case KEY_F9:
-        return KEYCODE_F9;
+        return LV_KEY_F9;
       case KEY_F10:
-        return KEYCODE_F10;
+        return LV_KEY_F10;
       default:
         return keycode;
     }
