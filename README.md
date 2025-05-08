@@ -76,9 +76,22 @@ And then from within the `nuttx` folder, you can configure and build one of the 
 ```console
 cd nuttx
 make distclean
-./tools/configure.sh ../picocalc-nx/configs/nsh
+./tools/configure.sh ../picocalc-nx/configs/nsh-debug
 make -j
 ```
+
+And then from within the `nuttx` folder, you can configure and build one of the PicoCalc configurations. In this case, the
+`atomshell` configuration.
+
+```console
+cd nuttx
+make distclean
+./tools/configure.sh ../picocalc-nx/configs/atomshell
+make -j
+```
+
+
+
 
 You should now have a UF2 `nuttx.uf2` that you can upload to the PicoCalc!
 
