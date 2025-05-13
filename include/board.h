@@ -139,7 +139,7 @@
 #define PICOCALC_KBD_I2C_FREQ 10 * 1000 // 10Khz
 #define PICOCALC_KBD_DEVICE "/dev/kbd"
 #define PICOCALC_KBD_POLL_INTERVAL_MSEC 30
-#define PICOCALC_KBD_POLL_PRIORITY 50
+#define PICOCALC_KBD_POLL_PRIORITY 100
 
 /****************************************************************************
  * Public Types
