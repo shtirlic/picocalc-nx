@@ -66,11 +66,6 @@ static int i2c_kbd_read(uint16_t *outval)
   uint8_t          cmd = PICOCALC_KBD_I2C_FIFO_CMD;
   uint8_t          buf[2];
   int              ret;
-  // struct timespec  interval;
-  // irqstate_t flags;
-
-  // interval.tv_sec  = 0;
-  // interval.tv_nsec = 16 * NSEC_PER_MSEC;
 
   msgs[0].frequency = PICOCALC_KBD_I2C_FREQ;
   msgs[0].addr      = PICOCALC_KBD_I2C_ADDR;
@@ -159,15 +154,24 @@ static int picocalc_kbd_read(void)
 
 static int picocalc_kbd_poll_worker(int argc, char *argv[])
 {
-  struct timespec interval;
-  interval.tv_sec  = 0;
-  interval.tv_nsec = PICOCALC_KBD_POLL_INTERVAL_MSEC * NSEC_PER_MSEC;
+  int ret;
+
+  ret = g_picocalc_kbd.fd = open(PICOCALC_KBD_I2C_DEV, O_RDONLY);
+  if (g_picocalc_kbd.fd < 0)
+    {
+      _err("Failed to open I2C %s: %d\n", PICOCALC_KBD_I2C_DEV, errno);
+      return ret;
+    }
+
+  /*   _info("Opened I2C device: fd=%d\n", fd); */
+
+  g_picocalc_kbd.opened         = true;
 
   while (g_picocalc_kbd.thread_running)
     {
       if (g_picocalc_kbd.opened)
         {
-          int ret = picocalc_kbd_read();
+          ret = picocalc_kbd_read();
           if (ret < 0)
             {
               _err("Failed to picocalc_kbd_read: %d\n", ret);
@@ -177,7 +181,7 @@ static int picocalc_kbd_poll_worker(int argc, char *argv[])
         {
           _err("g_picocalc_kbd.opened: %d\n", g_picocalc_kbd.opened);
         }
-      nxsig_nanosleep(&interval, NULL);
+      usleep(PICOCALC_KBD_POLL_INTERVAL_MSEC * USEC_PER_MSEC);
     }
 
   /*  _info("Polling thread stopped\n");  */
@@ -193,16 +197,6 @@ static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
   if (priv->opened)
     return 0;
 
-  ret = priv->fd = open(PICOCALC_KBD_I2C_DEV, O_RDONLY);
-  if (priv->fd < 0)
-    {
-      _err("Failed to open I2C %s: %d\n", PICOCALC_KBD_I2C_DEV, errno);
-      return ret;
-    }
-
-  /*   _info("Opened I2C device: fd=%d\n", fd); */
-
-  priv->opened         = true;
   priv->thread_running = true;
   ret = kthread_create("picocalc_kbd_poll", PICOCALC_KBD_POLL_PRIORITY, 2048,
                        picocalc_kbd_poll_worker, NULL);
