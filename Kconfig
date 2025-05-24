@@ -8,7 +8,6 @@ config ARCH_BOARD_PICOCALC
 	default y
 	depends on ARCH_CHIP_RP23XX
 	select ARCH_HAVE_LEDS
-	select ARM_HAVE_DSP
 	# select ARCH_HAVE_MPU
 
 	---help---
