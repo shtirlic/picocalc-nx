@@ -58,7 +58,7 @@ extern "C"
    *
    ****************************************************************************/
 
-#ifdef CONFIG_RP23XX_SPISD
+#ifdef CONFIG_RP23XX_RV_SPISD
   int board_spisd_initialize(int minor, int bus);
 #endif
 
@@ -70,7 +70,7 @@ extern "C"
    *
    ****************************************************************************/
 
-#ifdef CONFIG_RP23XX_SPISD
+#ifdef CONFIG_RP23XX_RV_SPISD
   uint8_t board_spisd_status(struct spi_dev_s *dev, uint32_t devid);
 #endif
 

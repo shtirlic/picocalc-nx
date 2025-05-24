@@ -32,7 +32,7 @@
 #include "rp23xx_pico.h"
 #include "rp23xx_gpio.h"
 
-#ifdef CONFIG_RP23XX_PSRAM
+#ifdef CONFIG_RP23XX_RV_PSRAM
 #include "rp23xx_psram.h"
 #endif
 
@@ -87,7 +87,7 @@ void rp23xx_boardinitialize(void)
   rp23xx_common_initialize();
   #endif
 
-  #ifdef CONFIG_RP23XX_PSRAM
+  #ifdef CONFIG_RP23XX_RV_PSRAM
   rp23xx_psramconfig();
   #endif
 }

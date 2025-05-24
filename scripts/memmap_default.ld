@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/scripts/memmap_default.ld
+ * boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv-riscv/scripts/memmap_default.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -76,8 +76,11 @@ SECTIONS
         KEEP (*(.vectors))
 
         LONG(0xffffded3)
-        LONG(0x10210142)
-        LONG(0x000001ff)
+        LONG(0x11010142)
+        LONG(0x00000344)
+        LONG(0x10000020)
+        LONG(0x00000000)
+        LONG(0x000004ff)
         LONG(0x00000000)
         LONG(0xab123579)
 
@@ -105,6 +108,7 @@ SECTIONS
         *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
         *(SORT(.dtors.*))
         *(.dtors)
+
 
         . = ALIGN(4);
         /* preinit data */

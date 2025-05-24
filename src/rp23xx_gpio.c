@@ -35,7 +35,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_internal.h"
+#include "riscv_internal.h"
 #include "chip.h"
 #include "rp23xx_gpio.h"
 

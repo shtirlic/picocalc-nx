@@ -59,7 +59,7 @@ extern "C"
    *
    ****************************************************************************/
 
-#ifdef CONFIG_RP23XX_I2S
+#ifdef CONFIG_RP23XX_RV_I2S
   int board_i2sdev_initialize(int bus);
 #endif
 

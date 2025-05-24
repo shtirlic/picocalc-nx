@@ -6,7 +6,7 @@
 config ARCH_BOARD_PICOCALC
 	bool "Raspberry Pi Pico 2 based PicoCalc"
 	default y
-	depends on ARCH_CHIP_RP23XX
+	depends on ARCH_CHIP_RP23XX_RV
 	select ARCH_HAVE_LEDS
 	# select ARCH_HAVE_MPU
 

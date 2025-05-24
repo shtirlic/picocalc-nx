@@ -59,7 +59,7 @@ extern "C"
    *
    ****************************************************************************/
 
-#ifdef CONFIG_RP23XX_I2C_DRIVER
+#ifdef CONFIG_RP23XX_RV_I2C_DRIVER
   int board_i2cdev_initialize(int bus);
 #endif
 
