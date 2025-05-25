@@ -61,7 +61,7 @@ extern "C"
    ****************************************************************************/
 
 #ifdef CONFIG_INPUT_PICOCALC_KBD
-  int board_picocalc_kbd_initialize(void);
+  int board_picocalc_kbd_initialize(FAR struct i2c_master_s *);
 #endif
 
 #undef EXTERN

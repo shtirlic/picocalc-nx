@@ -110,11 +110,8 @@ typedef enum {
 struct picocalc_kbd_dev_s
 {
   struct keyboard_lowerhalf_s lower; /* Must be first */
-  bool                        opened;
-  int                         kthread; /* The polling thread */
-  bool                        thread_running;
-  int                         fd;
-  int                         i2c_status;
+  FAR struct i2c_master_s     *i2c;
+  mutex_t dev_lock;                /* Manages exclusive access to the device */
 };
 
 static uint32_t keyboard_translate_picocalc_code(uint16_t keycode)

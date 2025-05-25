@@ -49,6 +49,8 @@
 #include <nuttx/lcd/lcd_dev.h>
 #endif
 
+#include "rp23xx_i2c.h"
+
 
 /****************************************************************************
  * Public Functions
@@ -93,7 +95,11 @@ int rp23xx_bringup(void)
 #endif
 
 #ifdef CONFIG_INPUT_PICOCALC_KBD
-  board_picocalc_kbd_initialize();
+  ret = board_picocalc_kbd_initialize(rp23xx_i2cbus_initialize(PICOCALC_KBD_I2C_BUS));
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_picocalc_kbd_initialize() failed: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_LCD_DEV
