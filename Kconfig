@@ -20,7 +20,7 @@ if ARCH_BOARD_PICOCALC
 		default y
 		select LCD
 		select LCD_DEV
-		select LCD_PORTRAIT
+		# select LCD_PORTRAIT
 		select LCD_ILI9341
 		select LCD_ILI9341_IFACE0
 		select GRAPHICS_LVGL
