@@ -49,54 +49,30 @@
 
 #include <arch/board/board.h>
 #include "picocalc_kbd.h"
+#include "rp23xx_i2c.h"
 
 static struct picocalc_kbd_dev_s g_picocalc_kbd;
 
-static int i2c_kbd_transfer(int fd, FAR struct i2c_msg_s *msgv, int msgc)
-{
-  struct i2c_transfer_s xfer;
-  xfer.msgv = msgv;
-  xfer.msgc = msgc;
-  return ioctl(fd, I2CIOC_TRANSFER, (unsigned long)((uintptr_t)&xfer));
-}
-
 static int i2c_kbd_read(uint16_t *outval)
 {
-  struct i2c_msg_s msgs[2];
   uint8_t          cmd = PICOCALC_KBD_I2C_FIFO_CMD;
   uint8_t          buf[2];
   int              ret;
 
-  msgs[0].frequency = PICOCALC_KBD_I2C_FREQ;
-  msgs[0].addr      = PICOCALC_KBD_I2C_ADDR;
-  msgs[0].flags     = I2C_M_NOSTOP;
-  msgs[0].buffer    = &cmd;
-  msgs[0].length    = sizeof(cmd);
-
-  msgs[1].frequency = PICOCALC_KBD_I2C_FREQ;
-  msgs[1].addr      = PICOCALC_KBD_I2C_ADDR;
-  msgs[1].flags     = I2C_M_READ;
-  msgs[1].buffer    = buf;
-  msgs[1].length    = sizeof(buf);
+  struct i2c_config_s config;
+  config.frequency = PICOCALC_KBD_I2C_FREQ;
+  config.address   = PICOCALC_KBD_I2C_ADDR;
+  config.addrlen   = 7;
 
   g_picocalc_kbd.i2c_status = 0;
-  // ret = i2c_kbd_transfer(g_picocalc_kbd.fd, &msgs[0], 1);
-  // if (ret < 0)
-  //   {
-  //     _err("i2c_kbd_read: Write transfer failed: %d (%d)\n", ret, errno);
-  //     return ret;
-  //   }
-  // nxsig_nanosleep(&interval, NULL);
+  ret = i2c_writeread(g_picocalc_kbd.i2c, &config, &cmd, sizeof(cmd), buf,
+                sizeof(buf));
 
-  // g_picocalc_kbd.i2c_status = 1;
-
-  ret = i2c_kbd_transfer(g_picocalc_kbd.fd, msgs, 2);
   if (ret < 0)
     {
       _err("i2c_kbd_read: Write/Read transfer failed: %d (%d)\n", ret, errno);
       return ret;
     }
-
   g_picocalc_kbd.i2c_status = 1;
 
   *outval = ((uint16_t)buf[1] << 8) | buf[0];
@@ -156,15 +132,6 @@ static int picocalc_kbd_poll_worker(int argc, char *argv[])
 {
   int ret;
 
-  ret = g_picocalc_kbd.fd = open(PICOCALC_KBD_I2C_DEV, O_RDONLY);
-  if (g_picocalc_kbd.fd < 0)
-    {
-      _err("Failed to open I2C %s: %d\n", PICOCALC_KBD_I2C_DEV, errno);
-      return ret;
-    }
-
-  /*   _info("Opened I2C device: fd=%d\n", fd); */
-
   g_picocalc_kbd.opened         = true;
 
   while (g_picocalc_kbd.thread_running)
@@ -198,13 +165,12 @@ static int picocalc_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
     return 0;
 
   priv->thread_running = true;
-  ret = kthread_create("picocalc_kbd_poll", PICOCALC_KBD_POLL_PRIORITY, 2048,
+  ret = kthread_create("picocalc_kbd_poll", PICOCALC_KBD_POLL_PRIORITY, 4096,
                        picocalc_kbd_poll_worker, NULL);
 
   if (ret < 0)
     {
       _err("Failed to create polling thread: %d\n", ret);
-      close(priv->fd);
       priv->opened         = false;
       priv->thread_running = false;
       return ret;
@@ -225,7 +191,6 @@ static int picocalc_kbd_close(FAR struct keyboard_lowerhalf_s *lower)
   priv->thread_running = false;
   kthread_delete(priv->kthread);
 
-  close(priv->fd);
   _info("picocalc_kbd closed\n");
 
   return 0;
@@ -250,6 +215,7 @@ int board_picocalc_kbd_initialize(void)
   priv->lower.close = picocalc_kbd_close;
   priv->lower.write = picocalc_kbd_write;
   priv->lower.priv  = priv;
+  priv->i2c         = rp23xx_i2cbus_initialize(1);
 
   ret = keyboard_register(&priv->lower, PICOCALC_KBD_DEVICE,
                           CONFIG_INPUT_PICOCALC_KBD_BUFFSIZE);

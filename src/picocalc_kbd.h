@@ -113,7 +113,7 @@ struct picocalc_kbd_dev_s
   bool                        opened;
   int                         kthread; /* The polling thread */
   bool                        thread_running;
-  int                         fd;
+  struct i2c_master_s        *i2c;
   int                         i2c_status;
 };
 
