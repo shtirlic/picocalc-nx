@@ -94,16 +94,17 @@
 #define KEY_F10 0x90
 
 // Define an enum for LV key codes
-typedef enum {
-  LV_KEY_F1 = 0x0131,  // Hex value for F1
-  LV_KEY_F2 = 0x0132,  // Hex value for F2
-  LV_KEY_F3 = 0x0133,  // Hex value for F3
-  LV_KEY_F4 = 0x0134,  // Hex value for F4
-  LV_KEY_F5 = 0x0135,  // Hex value for F5
-  LV_KEY_F6 = 0x0136,  // Hex value for F6
-  LV_KEY_F7 = 0x0137,  // Hex value for F7
-  LV_KEY_F8 = 0x0138,  // Hex value for F8
-  LV_KEY_F9 = 0x0139,  // Hex value for F9
+typedef enum
+{
+  LV_KEY_F1  = 0x0131, // Hex value for F1
+  LV_KEY_F2  = 0x0132, // Hex value for F2
+  LV_KEY_F3  = 0x0133, // Hex value for F3
+  LV_KEY_F4  = 0x0134, // Hex value for F4
+  LV_KEY_F5  = 0x0135, // Hex value for F5
+  LV_KEY_F6  = 0x0136, // Hex value for F6
+  LV_KEY_F7  = 0x0137, // Hex value for F7
+  LV_KEY_F8  = 0x0138, // Hex value for F8
+  LV_KEY_F9  = 0x0139, // Hex value for F9
   LV_KEY_F10 = 0x013A  // Hex value for F10
 } lv_key_t;
 

@@ -55,9 +55,9 @@ static struct picocalc_kbd_dev_s g_picocalc_kbd;
 
 static int i2c_kbd_read(uint16_t *outval)
 {
-  uint8_t          cmd = PICOCALC_KBD_I2C_FIFO_CMD;
-  uint8_t          buf[2];
-  int              ret;
+  uint8_t cmd = PICOCALC_KBD_I2C_FIFO_CMD;
+  uint8_t buf[2];
+  int     ret;
 
   struct i2c_config_s config;
   config.frequency = PICOCALC_KBD_I2C_FREQ;
@@ -66,11 +66,12 @@ static int i2c_kbd_read(uint16_t *outval)
 
   g_picocalc_kbd.i2c_status = 0;
   ret = i2c_writeread(g_picocalc_kbd.i2c, &config, &cmd, sizeof(cmd), buf,
-                sizeof(buf));
+                      sizeof(buf));
 
   if (ret < 0)
     {
-      _err("i2c_kbd_read: Write/Read transfer failed: %d (%d)\n", ret, errno);
+      _err("i2c_kbd_read: Write/Read transfer failed: %d (%d)\n", ret,
+           errno);
       return ret;
     }
   g_picocalc_kbd.i2c_status = 1;
@@ -117,10 +118,9 @@ static int picocalc_kbd_read(void)
               _info("Char: %d %s\n", c,
                     KEY_EVENT_PRESS(buff) ? "press" : "release");
 #endif
-
-              keyboard_event(&g_picocalc_kbd.lower,
-                keyboard_translate_picocalc_code(c),
-                KEY_EVENT_PRESS(buff) ? KEYBOARD_PRESS : KEYBOARD_RELEASE);
+              keyboard_event(
+                  &g_picocalc_kbd.lower, keyboard_translate_picocalc_code(c),
+                  KEY_EVENT_PRESS(buff) ? KEYBOARD_PRESS : KEYBOARD_RELEASE);
             }
         }
     }
@@ -132,7 +132,7 @@ static int picocalc_kbd_poll_worker(int argc, char *argv[])
 {
   int ret;
 
-  g_picocalc_kbd.opened         = true;
+  g_picocalc_kbd.opened = true;
 
   while (g_picocalc_kbd.thread_running)
     {
@@ -216,6 +216,11 @@ int board_picocalc_kbd_initialize(void)
   priv->lower.write = picocalc_kbd_write;
   priv->lower.priv  = priv;
   priv->i2c         = rp23xx_i2cbus_initialize(1);
+  if (!priv->i2c)
+    {
+      _err("Failed to initialize I2C bus\n");
+      return -ENODEV;
+    }
 
   ret = keyboard_register(&priv->lower, PICOCALC_KBD_DEVICE,
                           CONFIG_INPUT_PICOCALC_KBD_BUFFSIZE);
