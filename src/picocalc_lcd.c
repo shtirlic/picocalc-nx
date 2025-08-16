@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/picocalc/src/picocalc_lcd.c
+ * boards/risc-v/rp23xx-rv/picocalc/src/picocalc_lcd.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

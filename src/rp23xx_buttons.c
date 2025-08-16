@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/src/rp23xx_buttons.c
+ * boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/src/rp23xx_buttons.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_INPUT_BUTTONS) && !defined(CONFIG_ARCH_IRQBUTTONS)
-#  error "The NuttX Buttons Driver depends on IRQ support to work!\n"
+#error "The NuttX Buttons Driver depends on IRQ support to work!\n"
 #endif
 
 /****************************************************************************
@@ -50,10 +50,8 @@
 
 /* Pin configuration for external raspberrypi-pico-2 buttons. */
 
-static const uint32_t g_buttons[NUM_BUTTONS] =
-{
-  GPIO_BTN_USER1, GPIO_BTN_USER2
-};
+static const uint32_t g_buttons[NUM_BUTTONS] = { GPIO_BTN_USER1,
+                                                 GPIO_BTN_USER2 };
 
 /****************************************************************************
  * Public Functions
@@ -97,7 +95,7 @@ uint32_t board_button_initialize(void)
 uint32_t board_buttons(void)
 {
   uint32_t ret = 0;
-  int i;
+  int      i;
 
   /* Check that state of each key */
 
@@ -111,7 +109,7 @@ uint32_t board_buttons(void)
 
       if (!released)
         {
-           ret |= (1 << i);
+          ret |= (1 << i);
         }
     }
 
@@ -155,10 +153,8 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 
       /* Attach the interrupt handler */
 
-      ret = rp23xx_gpio_irq_attach(g_buttons[id],
-                                   RP23XX_GPIO_INTR_EDGE_LOW,
-                                   irqhandler,
-                                   arg);
+      ret = rp23xx_gpio_irq_attach(g_buttons[id], RP23XX_GPIO_INTR_EDGE_LOW,
+                                   irqhandler, arg);
       if (ret < 0)
         {
           syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/src/rp23xx_appinit.c
+ * boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/src/rp23xx_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

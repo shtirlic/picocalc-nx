@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/src/rp23xx_userleds.c
+ * boards/risc-v/rp23xx-rv/picocalc/src/rp23xx_userleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -45,8 +45,7 @@
 
 /* This array maps an LED number to GPIO pin configuration */
 
-static uint32_t g_ledcfg[BOARD_NLEDS] =
-{
+static uint32_t g_ledcfg[BOARD_NLEDS] = {
   GPIO_LED1,
 };
 
@@ -59,8 +58,8 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
 #ifdef CONFIG_PM
 static void led_pm_notify(struct pm_callback_s *cb, int domain,
                           enum pm_state_e pmstate);
-static int led_pm_prepare(struct pm_callback_s *cb, int domain,
-                          enum pm_state_e pmstate);
+static int  led_pm_prepare(struct pm_callback_s *cb, int domain,
+                           enum pm_state_e pmstate);
 #endif
 
 /****************************************************************************
@@ -68,8 +67,7 @@ static int led_pm_prepare(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static struct pm_callback_s g_ledscb =
-{
+static struct pm_callback_s g_ledscb = {
   .notify  = led_pm_notify,
   .prepare = led_pm_prepare,
 };
@@ -94,7 +92,7 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
 {
   switch (pmstate)
     {
-      case(PM_NORMAL):
+      case (PM_NORMAL):
         {
           /* Restore normal LEDs operation */
 
@@ -102,7 +100,7 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_IDLE):
+      case (PM_IDLE):
         {
           /* Entering IDLE mode - Turn leds off */
 
@@ -110,13 +108,13 @@ static void led_pm_notify(struct pm_callback_s *cb, int domain,
         }
         break;
 
-      case(PM_STANDBY):
+      case (PM_STANDBY):
         {
           /* Entering STANDBY mode - Logic for PM_STANDBY goes here */
         }
         break;
 
-      case(PM_SLEEP):
+      case (PM_SLEEP):
         {
           /* Entering SLEEP mode - Logic for PM_SLEEP goes here */
         }

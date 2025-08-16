@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/src/rp23xx_pico.h
+ * boards/risc-v/rp23xx-rv/picocalc/src/rp23xx_pico.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,20 +29,20 @@
 
 /* LEDs */
 
-#define GPIO_LED1       25 /* The board's LED is connected to this pin */
+#define GPIO_LED1 25 /* The board's LED is connected to this pin */
 
 /* Buttons */
 
 /* Buttons GPIO pins definition */
 
-#define GPIO_BTN_USER1     16
-#define GPIO_BTN_USER2     17
+#define GPIO_BTN_USER1 16
+#define GPIO_BTN_USER2 17
 
 /* Buttons IRQ definitions */
 
-#define MIN_IRQBUTTON     BUTTON_USER1
-#define MAX_IRQBUTTON     BUTTON_USER2
-#define NUM_IRQBUTTONS    (BUTTON_USER1 - BUTTON_USER2 + 1)
+#define MIN_IRQBUTTON BUTTON_USER1
+#define MAX_IRQBUTTON BUTTON_USER2
+#define NUM_IRQBUTTONS (BUTTON_USER1 - BUTTON_USER2 + 1)
 
 int rp23xx_bringup(void);
 

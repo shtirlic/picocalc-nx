@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/picocalc/include/board.h
+ * boards/risc-v/rp23xx-rv/picocalc/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,6 @@
 #include "rp23xx_spisd.h"
 #include "picocalc_kbd.h"
 #include "picocalc_lcd.h"
-
 
 #ifndef __ASSEMBLY__
 #include <stdint.h>
@@ -107,7 +106,7 @@
 #define LED_SIGNAL 3       /* In a signal handler     ON    */
 #define LED_ASSERTION 4    /* An assertion failed     ON    */
 #define LED_PANIC 5        /* The system has crashed  FLASH  */
-#define LED_IDLE  6           /* Not used                       */
+#define LED_IDLE 6         /* Not used                       */
 
 /* Thus if the LED is statically on, NuttX has successfully  booted and is,
  * apparently, running normally.  If the LED is flashing at approximately

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/src/rp23xx_boardinitialize.c
+ * boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/src/rp23xx_boardinitialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -61,9 +61,9 @@
 
 void rp23xx_boardearlyinitialize(void)
 {
-  #ifdef CONFIG_ARCH_BOARD_COMMON
+#ifdef CONFIG_ARCH_BOARD_COMMON
   rp23xx_common_earlyinitialize();
-  #endif
+#endif
 
   /* --- Place any board specific early initialization here --- */
 
@@ -83,21 +83,21 @@ void rp23xx_boardearlyinitialize(void)
 
 void rp23xx_boardinitialize(void)
 {
-  #ifdef CONFIG_ARCH_BOARD_COMMON
+#ifdef CONFIG_ARCH_BOARD_COMMON
   rp23xx_common_initialize();
-  #endif
+#endif
 
-  #ifdef CONFIG_RP23XX_RV_PSRAM
+#ifdef CONFIG_RP23XX_RV_PSRAM
   rp23xx_psramconfig();
-  #endif
+#endif
 }
-  /* --- Place any board specific initialization here --- */
+/* --- Place any board specific initialization here --- */
 
-  #ifdef CONFIG_BOARD_LATE_INITIALIZE
-  void board_late_initialize(void)
-  {
-    /* Perform board-specific initialization */
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  /* Perform board-specific initialization */
 
-    rp23xx_bringup();
-  }
-  #endif
+  rp23xx_bringup();
+}
+#endif

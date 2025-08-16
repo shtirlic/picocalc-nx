@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/src/rp23xx_autoleds.c
+ * boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/src/rp23xx_autoleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -124,7 +124,7 @@ void board_autoled_on(int led)
 
       /* LED NC*/
       case LED_INIRQ:
-      return;
+        return;
 
       /* LED On */
       case LED_STACKCREATED:
@@ -161,18 +161,18 @@ void board_autoled_off(int led)
       /* LED NC */
       case 0:
       case LED_INIRQ:
-      return;
+        return;
 
       case LED_IDLE:
-      ledoff = true;
-      break;
+        ledoff = true;
+        break;
 
       /* LED Off */
       case LED_STACKCREATED:
       case LED_SIGNAL:
       case LED_ASSERTION:
       case LED_PANIC:
-      break;
+        break;
     }
 
   rp23xx_gpio_put(GPIO_LED1, ledoff); /* High illuminates */

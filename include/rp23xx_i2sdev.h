@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/picocalc/include/rp23xx_i2sdev.h
+ * boards/risc-v/rp23xx-rv/picocalc/include/rp23xx_i2sdev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

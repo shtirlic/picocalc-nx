@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/scripts/memmap_no_flash.ld
+ * boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/scripts/memmap_no_flash.ld
  *
  * SPDX-License-Identifier: Apache-2.0
  *

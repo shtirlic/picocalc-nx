@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/picocalc/src/picocalc_kbd.h
+ * boards/risc-v/rp23xx-rv/picocalc/src/picocalc_kbd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/picocalc/include/picocalc_lcd.h
+ * boards/risc-v/rp23xx-rv/picocalc/include/picocalc_lcd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

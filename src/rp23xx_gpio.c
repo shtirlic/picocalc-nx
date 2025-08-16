@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/src/rp23xx_gpio.c
+ * boards/risc-v/rp23xx-rv/raspberrypi-pico-2-rv/src/rp23xx_gpio.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -44,17 +44,17 @@
 /* Output pins. GPIO25 is onboard LED any other outputs could be used.
  */
 
-#define GPIO_OUT1     25
+#define GPIO_OUT1 25
 
 /* Input pins.
  */
 
-#define GPIO_IN1      6
+#define GPIO_IN1 6
 
 /* Interrupt pins.
  */
 
-#define GPIO_IRQPIN1  14
+#define GPIO_IRQPIN1 14
 
 /****************************************************************************
  * Private Types
@@ -63,13 +63,13 @@
 struct rp23xxgpio_dev_s
 {
   struct gpio_dev_s gpio;
-  uint8_t id;
+  uint8_t           id;
 };
 
 struct rp23xxgpint_dev_s
 {
   struct rp23xxgpio_dev_s rp23xxgpio;
-  pin_interrupt_t callback;
+  pin_interrupt_t         callback;
 };
 
 /****************************************************************************
@@ -87,8 +87,7 @@ static int gpin_read(struct gpio_dev_s *dev, bool *value);
 
 #if BOARD_NGPIOINT > 0
 static int gpint_read(struct gpio_dev_s *dev, bool *value);
-static int gpint_attach(struct gpio_dev_s *dev,
-                        pin_interrupt_t callback);
+static int gpint_attach(struct gpio_dev_s *dev, pin_interrupt_t callback);
 static int gpint_enable(struct gpio_dev_s *dev, bool enable);
 #endif
 
@@ -97,8 +96,7 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable);
  ****************************************************************************/
 
 #if BOARD_NGPIOOUT > 0
-static const struct gpio_operations_s gpout_ops =
-{
+static const struct gpio_operations_s gpout_ops = {
   .go_read   = gpout_read,
   .go_write  = gpout_write,
   .go_attach = NULL,
@@ -107,17 +105,13 @@ static const struct gpio_operations_s gpout_ops =
 
 /* This array maps the GPIO pins used as OUTPUT */
 
-static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
-{
-  GPIO_OUT1
-};
+static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] = { GPIO_OUT1 };
 
 static struct rp23xxgpio_dev_s g_gpout[BOARD_NGPIOOUT];
 #endif
 
 #if BOARD_NGPIOIN > 0
-static const struct gpio_operations_s gpin_ops =
-{
+static const struct gpio_operations_s gpin_ops = {
   .go_read   = gpin_read,
   .go_write  = NULL,
   .go_attach = NULL,
@@ -126,17 +120,13 @@ static const struct gpio_operations_s gpin_ops =
 
 /* This array maps the GPIO pins used as INTERRUPT INPUTS */
 
-static const uint32_t g_gpioinputs[BOARD_NGPIOIN] =
-{
-  GPIO_IN1
-};
+static const uint32_t g_gpioinputs[BOARD_NGPIOIN] = { GPIO_IN1 };
 
 static struct rp23xxgpio_dev_s g_gpin[BOARD_NGPIOIN];
 #endif
 
 #if BOARD_NGPIOINT > 0
-static const struct gpio_operations_s gpint_ops =
-{
+static const struct gpio_operations_s gpint_ops = {
   .go_read   = gpint_read,
   .go_write  = NULL,
   .go_attach = gpint_attach,
@@ -145,8 +135,7 @@ static const struct gpio_operations_s gpint_ops =
 
 /* This array maps the GPIO pins used as INTERRUPT INPUTS */
 
-static const uint32_t g_gpiointinputs[BOARD_NGPIOINT] =
-{
+static const uint32_t g_gpiointinputs[BOARD_NGPIOINT] = {
   GPIO_IRQPIN1,
 };
 
@@ -164,8 +153,7 @@ static struct rp23xxgpint_dev_s g_gpint[BOARD_NGPIOINT];
 #if BOARD_NGPIOOUT > 0
 static int gpout_read(struct gpio_dev_s *dev, bool *value)
 {
-  struct rp23xxgpio_dev_s *rp23xxgpio =
-    (struct rp23xxgpio_dev_s *)dev;
+  struct rp23xxgpio_dev_s *rp23xxgpio = (struct rp23xxgpio_dev_s *)dev;
 
   DEBUGASSERT(rp23xxgpio != NULL && value != NULL);
   DEBUGASSERT(rp23xxgpio->id < BOARD_NGPIOOUT);
@@ -181,8 +169,7 @@ static int gpout_read(struct gpio_dev_s *dev, bool *value)
 
 static int gpout_write(struct gpio_dev_s *dev, bool value)
 {
-  struct rp23xxgpio_dev_s *rp23xxgpio =
-    (struct rp23xxgpio_dev_s *)dev;
+  struct rp23xxgpio_dev_s *rp23xxgpio = (struct rp23xxgpio_dev_s *)dev;
 
   DEBUGASSERT(rp23xxgpio != NULL);
   DEBUGASSERT(rp23xxgpio->id < BOARD_NGPIOOUT);
@@ -200,8 +187,7 @@ static int gpout_write(struct gpio_dev_s *dev, bool value)
 #if BOARD_NGPIOIN > 0
 static int gpin_read(struct gpio_dev_s *dev, bool *value)
 {
-  struct rp23xxgpio_dev_s *rp23xxgpio =
-    (struct rp23xxgpio_dev_s *)dev;
+  struct rp23xxgpio_dev_s *rp23xxgpio = (struct rp23xxgpio_dev_s *)dev;
 
   DEBUGASSERT(rp23xxgpio != NULL && value != NULL);
   DEBUGASSERT(rp23xxgpio->id < BOARD_NGPIOIN);
@@ -219,14 +205,13 @@ static int gpin_read(struct gpio_dev_s *dev, bool *value)
 #if BOARD_NGPIOINT > 0
 static int rp23xxgpio_interrupt(int irq, void *context, void *arg)
 {
-  struct rp23xxgpint_dev_s *rp23xxgpint =
-    (struct rp23xxgpint_dev_s *)arg;
+  struct rp23xxgpint_dev_s *rp23xxgpint = (struct rp23xxgpint_dev_s *)arg;
 
   DEBUGASSERT(rp23xxgpint != NULL && rp23xxgpint->callback != NULL);
   gpioinfo("Interrupt! callback=%p\n", rp23xxgpint->callback);
 
   rp23xxgpint->callback(&rp23xxgpint->rp23xxgpio.gpio,
-                       rp23xxgpint->rp23xxgpio.id);
+                        rp23xxgpint->rp23xxgpio.id);
   return OK;
 }
 
@@ -236,8 +221,7 @@ static int rp23xxgpio_interrupt(int irq, void *context, void *arg)
 
 static int gpint_read(struct gpio_dev_s *dev, bool *value)
 {
-  struct rp23xxgpint_dev_s *rp23xxgpint =
-    (struct rp23xxgpint_dev_s *)dev;
+  struct rp23xxgpint_dev_s *rp23xxgpint = (struct rp23xxgpint_dev_s *)dev;
 
   DEBUGASSERT(rp23xxgpint != NULL && value != NULL);
   DEBUGASSERT(rp23xxgpint->rp23xxgpio.id < BOARD_NGPIOINT);
@@ -251,11 +235,9 @@ static int gpint_read(struct gpio_dev_s *dev, bool *value)
  * Name: gpint_attach
  ****************************************************************************/
 
-static int gpint_attach(struct gpio_dev_s *dev,
-                        pin_interrupt_t callback)
+static int gpint_attach(struct gpio_dev_s *dev, pin_interrupt_t callback)
 {
-  struct rp23xxgpint_dev_s *rp23xxgpint =
-    (struct rp23xxgpint_dev_s *)dev;
+  struct rp23xxgpint_dev_s *rp23xxgpint = (struct rp23xxgpint_dev_s *)dev;
   int irq = g_gpiointinputs[rp23xxgpint->rp23xxgpio.id];
   int ret;
 
@@ -264,8 +246,7 @@ static int gpint_attach(struct gpio_dev_s *dev,
   /* Make sure the interrupt is disabled */
 
   rp23xx_gpio_disable_irq(irq);
-  ret = rp23xx_gpio_irq_attach(irq,
-                               RP23XX_GPIO_INTR_EDGE_LOW,
+  ret = rp23xx_gpio_irq_attach(irq, RP23XX_GPIO_INTR_EDGE_LOW,
                                rp23xxgpio_interrupt,
                                &g_gpint[rp23xxgpint->rp23xxgpio.id]);
   if (ret < 0)
@@ -285,8 +266,7 @@ static int gpint_attach(struct gpio_dev_s *dev,
 
 static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 {
-  struct rp23xxgpint_dev_s *rp23xxgpint =
-    (struct rp23xxgpint_dev_s *)dev;
+  struct rp23xxgpint_dev_s *rp23xxgpint = (struct rp23xxgpint_dev_s *)dev;
   int irq = g_gpiointinputs[rp23xxgpint->rp23xxgpio.id];
 
   if (enable)
