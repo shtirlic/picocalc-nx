@@ -43,7 +43,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/irq.h>
-#include <nuttx/input/kbd_codec.h>
 #include <nuttx/input/keyboard.h>
 #include <nuttx/wqueue.h>
 

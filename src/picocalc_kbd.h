@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/input/kbd_codec.h>
 
 #define KEY_STATE_IDLE 0
 #define KEY_STATE_PRESSED 1
