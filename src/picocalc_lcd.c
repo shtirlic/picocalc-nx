@@ -71,12 +71,10 @@ struct picocalc_lcd_s
 };
 
 static const struct picocalc_lcd_config_data g_lcd_config[] = {
-  // {
-  //   ILI9488_CMD_MEMORY_ACCESS_CONTROL, 1, //0x36
-  //   {
-  //     0x48
-  //   }
-  // },
+  { ILI9488_CMD_MEMORY_ACCESS_CONTROL,
+   1, //0x36
+    { ILI9341_MEMORY_ACCESS_CONTROL_MX |
+      ILI9341_MEMORY_ACCESS_CONTROL_BGR } },
   // {
   //   ILI9488_CMD_COLMOD_PIXEL_FORMAT_SET, 1, //0x3a
   //   {
@@ -136,8 +134,9 @@ static const struct picocalc_lcd_config_data g_lcd_config[] = {
    3, //0xb6
     { 0x02, 0x02, 0x3b } },
   { ILI9488_CMD_ENTRY_MODE_SET,
-   3, //0xb7
-    { 0xc6, 0xe9, 0x00 } },
+   1, //0xb7
+    { 0xc6 } },
+  { 0xE9, 1, { 0x00 } }, /* disable 24-bit bus */
   { ILI9488_CMD_ADJUST_CONTROL_3,
    4, //0xf7
     { 0xa9, 0x51, 0x2c, 0x82 } },
@@ -559,7 +558,9 @@ int board_lcd_initialize(void)
           // up_mdelay(120);
 
           // priv->dev.sendcmd(&priv->dev, ILI9488_CMD_MEMORY_ACCESS_CONTROL);
-          // priv->dev.sendparam(&priv->dev, 0x40);
+          // priv->dev.sendparam(&priv->dev,
+          // ILI9341_MEMORY_ACCESS_CONTROL_MX |
+          // ILI9341_MEMORY_ACCESS_CONTROL_BGR);
           // priv->dev.deselect(&priv->dev);
 
           g_lcd->setpower(g_lcd, CONFIG_LCD_MAXPOWER);
