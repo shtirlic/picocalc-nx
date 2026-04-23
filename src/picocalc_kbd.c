@@ -147,7 +147,7 @@ static int picocalc_kbd_poll_worker(int argc, char *argv[])
         {
           _err("g_picocalc_kbd.opened: %d\n", g_picocalc_kbd.opened);
         }
-      usleep(PICOCALC_KBD_POLL_INTERVAL_MSEC * USEC_PER_MSEC);
+      nxsched_usleep(PICOCALC_KBD_POLL_INTERVAL_MSEC * USEC_PER_MSEC);
     }
 
   /*  _info("Polling thread stopped\n");  */
